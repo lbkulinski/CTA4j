@@ -30,6 +30,32 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 public final class Controller {
+    private static double getDistance(double latitude0, double longitude0, double latitude1, double longitude1) {
+        double deltaLatitude = Math.toRadians(latitude1 - latitude0);
+
+        double deltaLongitude = Math.toRadians(longitude1 - longitude0);
+
+        latitude0 = Math.toRadians(latitude0);
+
+        latitude1 = Math.toRadians(latitude1);
+
+        double a = Math.pow(Math.sin(deltaLatitude / 2.0), 2.0);
+
+        a += (Math.cos(latitude0) * Math.cos(latitude1));
+
+        a *= Math.pow(Math.sin(deltaLongitude / 2.0), 2.0);
+
+        double c = Math.asin(Math.sqrt(a)) * 2.0;
+
+        final double r = 6371.0;
+
+        double kilometers = r * c;
+
+        double mileConversion = 0.6213712;
+
+        return kilometers * mileConversion;
+    } //getDistance
+
     @GetMapping
     public String getNearbyTrains(@RequestParam double latitude, double longitude) {
         System.out.printf("%f, %f%n", latitude, longitude);
