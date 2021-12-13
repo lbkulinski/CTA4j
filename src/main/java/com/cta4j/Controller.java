@@ -106,7 +106,8 @@ public final class Controller {
 
         gsonBuilder.registerTypeAdapter(Train.class, new TrainTypeAdapter());
 
-        Gson gson = gsonBuilder.create();
+        Gson gson = gsonBuilder.setPrettyPrinting()
+                               .create();
 
         JsonObject response = new JsonObject();
 
