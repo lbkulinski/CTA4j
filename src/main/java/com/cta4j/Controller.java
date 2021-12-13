@@ -26,7 +26,6 @@ package com.cta4j;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Set;
 import com.cta4j.model.Route;
 import java.util.Map;
@@ -45,7 +44,7 @@ import com.google.gson.JsonElement;
  * A controller of the CTA4j application.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 21, 2021
+ * @version December 13, 2021
  */
 @RestController
 public final class Controller {
@@ -85,34 +84,18 @@ public final class Controller {
     } //getDistance
 
     /**
-     * Returns a JSON response containing the trains that are within the specified maximum distance from the specified
-     * latitude and longitude.
+     * Returns a JSON response containing information about active trains.
      *
-     * @param latitude the latitude to be used in the operation
-     * @param longitude the longitude to be used in the operation
-     * @param maximumDistance the maximum distance to be used in the operation
-     * @return a JSON response containing the trains that are within the specified maximum distance from the specified
-     * latitude and longitude
+     * @return a JSON response containing information about active trains
      */
     @GetMapping
-    public String getNearbyTrains(@RequestParam double latitude, @RequestParam double longitude,
-                                  @RequestParam(name = "max_distance", defaultValue = "0.1") double maximumDistance) {
+    public String getActiveTrains() {
         Set<Route> routes = ChicagoTransitAuthority.getRoutes();
 
         Map<Color, Set<Train>> colorToNearbyTrains = new HashMap<>();
 
         for (Route route : routes) {
             for (Train train : route.trains()) {
-                double trainLatitude = train.latitude();
-
-                double trainLongitude = train.longitude();
-
-                double distance = Controller.getDistance(latitude, longitude, trainLatitude, trainLongitude);
-
-                if (Double.compare(distance, maximumDistance) > 0) {
-                    continue;
-                } //end if
-
                 Set<Train> nearbyTrains = colorToNearbyTrains.computeIfAbsent(route.color(), key -> new HashSet<>());
 
                 nearbyTrains.add(train);
@@ -142,5 +125,5 @@ public final class Controller {
         });
 
         return gson.toJson(response);
-    } //getNearbyTrains
+    } //getActiveTrains
 }
