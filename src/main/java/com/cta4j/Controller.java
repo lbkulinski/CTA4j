@@ -113,6 +113,6 @@ public final class Controller {
             response.add(colorString, nearbyTrainArray);
         });
 
-        return response.getAsString();
+        return gson.toJson(response);
     } //getNearbyTrains
 }
