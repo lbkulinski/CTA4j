@@ -27,8 +27,19 @@ package com.cta4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.SpringApplication;
 
+/**
+ * An application of CTA4j.
+ *
+ * @author Logan Kulinski, lbkulinski@gmail.com
+ * @version December 12, 2021
+ */
 @SpringBootApplication
 public class Application {
+    /**
+     * Runs an instance of the CTA4j application.
+     * 
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     } //main

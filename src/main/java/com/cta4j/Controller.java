@@ -24,22 +24,40 @@
 
 package com.cta4j;
 
-import com.cta4j.model.Color;
-import com.cta4j.model.Route;
-import com.cta4j.model.Train;
-import com.cta4j.model.adapters.TrainTypeAdapter;
-import com.google.gson.*;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import java.util.Set;
+import com.cta4j.model.Route;
+import java.util.Map;
+import com.cta4j.model.Color;
+import com.cta4j.model.Train;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.google.gson.GsonBuilder;
+import com.cta4j.model.adapters.TrainTypeAdapter;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 
+/**
+ * A controller of the CTA4j application.
+ *
+ * @author Logan Kulinski, lbkulinski@gmail.com
+ * @version December 21, 2021
+ */
 @RestController
 public final class Controller {
+    /**
+     * Returns the distance, in miles, between the specified latitudes and longitudes.
+     *
+     * @param latitude0 the first latitude to be used in the operation
+     * @param longitude0 the first longitude to be used in the operation
+     * @param latitude1 the second latitude to be used in the operation
+     * @param longitude1 the second longitude to be used in the operation
+     * @return the distance, in miles, between the specified latitudes and longitudes
+     */
     private static double getDistance(double latitude0, double longitude0, double latitude1, double longitude1) {
         double deltaLatitude = Math.toRadians(latitude1 - latitude0);
 
@@ -66,6 +84,16 @@ public final class Controller {
         return kilometers * mileConversion;
     } //getDistance
 
+    /**
+     * Returns a JSON response containing the trains that are within the specified maximum distance from the specified
+     * latitude and longitude.
+     *
+     * @param latitude the latitude to be used in the operation
+     * @param longitude the longitude to be used in the operation
+     * @param maximumDistance the maximum distance to be used in the operation
+     * @return a JSON response containing the trains that are within the specified maximum distance from the specified
+     * latitude and longitude
+     */
     @GetMapping
     public String getNearbyTrains(@RequestParam double latitude, @RequestParam double longitude,
                                   @RequestParam(name = "max_distance", defaultValue = "0.1") double maximumDistance) {
