@@ -24,9 +24,19 @@
 
 package com.cta4j;
 
+import com.cta4j.model.Color;
+import com.cta4j.model.Route;
+import com.cta4j.model.Train;
+import com.cta4j.model.adapters.TrainTypeAdapter;
+import com.google.gson.*;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 public final class Controller {
@@ -57,12 +67,52 @@ public final class Controller {
     } //getDistance
 
     @GetMapping
-    public String getNearbyTrains(@RequestParam double latitude, double longitude) {
-        System.out.printf("%f, %f%n", latitude, longitude);
+    public String getNearbyTrains(@RequestParam double latitude, @RequestParam double longitude,
+                                  @RequestParam(name = "max_distance", defaultValue = "0.1") double maximumDistance) {
+        Set<Route> routes = ChicagoTransitAuthority.getRoutes();
 
-        return """
-               {
-                   "success": true
-               }""";
+        Map<Color, Set<Train>> colorToNearbyTrains = new HashMap<>();
+
+        for (Route route : routes) {
+            for (Train train : route.trains()) {
+                double trainLatitude = train.latitude();
+
+                double trainLongitude = train.longitude();
+
+                double distance = Controller.getDistance(latitude, longitude, trainLatitude, trainLongitude);
+
+                if (Double.compare(distance, maximumDistance) > 0) {
+                    continue;
+                } //end if
+
+                Set<Train> nearbyTrains = colorToNearbyTrains.computeIfAbsent(route.color(), key -> new HashSet<>());
+
+                nearbyTrains.add(train);
+            } //end if
+        } //end for
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+
+        gsonBuilder.registerTypeAdapter(Train.class, new TrainTypeAdapter());
+
+        Gson gson = gsonBuilder.create();
+
+        JsonObject response = new JsonObject();
+
+        colorToNearbyTrains.forEach((color, nearbyTrains) -> {
+            JsonArray nearbyTrainArray = new JsonArray();
+
+            nearbyTrains.forEach(train -> {
+                JsonElement trainElement = gson.toJsonTree(train, Train.class);
+
+                nearbyTrainArray.add(trainElement);
+            });
+
+            String colorString = color.toString();
+
+            response.add(colorString, nearbyTrainArray);
+        });
+
+        return response.getAsString();
     } //getNearbyTrains
 }
