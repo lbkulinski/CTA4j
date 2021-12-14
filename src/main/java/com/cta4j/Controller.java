@@ -26,6 +26,7 @@ package com.cta4j;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Set;
 import com.cta4j.model.Route;
 import java.util.Map;
@@ -44,53 +45,22 @@ import com.google.gson.JsonElement;
  * A controller of the CTA4j application.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 13, 2021
+ * @version December 14, 2021
  */
 @RestController
 public final class Controller {
     /**
-     * Returns the distance, in miles, between the specified latitudes and longitudes.
+     * Returns a JSON response containing information about routes.
      *
-     * @param latitude0 the first latitude to be used in the operation
-     * @param longitude0 the first longitude to be used in the operation
-     * @param latitude1 the second latitude to be used in the operation
-     * @param longitude1 the second longitude to be used in the operation
-     * @return the distance, in miles, between the specified latitudes and longitudes
+     * @return a JSON response containing information about routes
      */
-    private static double getDistance(double latitude0, double longitude0, double latitude1, double longitude1) {
-        double deltaLatitude = Math.toRadians(latitude1 - latitude0);
+    @GetMapping("get-routes")
+    public String getRoutes(@RequestParam(name = "route", required = false) String[] routeNames) {
+        if (routeNames == null) {
+            routeNames = new String[0];
+        } //end if
 
-        double deltaLongitude = Math.toRadians(longitude1 - longitude0);
-
-        latitude0 = Math.toRadians(latitude0);
-
-        latitude1 = Math.toRadians(latitude1);
-
-        double a = Math.pow(Math.sin(deltaLatitude / 2.0), 2.0);
-
-        a += (Math.cos(latitude0) * Math.cos(latitude1));
-
-        a *= Math.pow(Math.sin(deltaLongitude / 2.0), 2.0);
-
-        double c = Math.asin(Math.sqrt(a)) * 2.0;
-
-        final double r = 6371.0;
-
-        double kilometers = r * c;
-
-        double mileConversion = 0.6213712;
-
-        return kilometers * mileConversion;
-    } //getDistance
-
-    /**
-     * Returns a JSON response containing information about active trains.
-     *
-     * @return a JSON response containing information about active trains
-     */
-    @GetMapping
-    public String getActiveTrains() {
-        Set<Route> routes = ChicagoTransitAuthority.getRoutes();
+        Set<Route> routes = ChicagoTransitAuthority.getRoutes(routeNames);
 
         Map<Color, Set<Train>> colorToNearbyTrains = new HashMap<>();
 
@@ -126,5 +96,5 @@ public final class Controller {
         });
 
         return gson.toJson(response);
-    } //getActiveTrains
+    } //getRoutes
 }

@@ -28,6 +28,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import java.util.Set;
 import com.cta4j.model.Route;
+import java.util.Objects;
+import java.util.Arrays;
 import java.util.Properties;
 import java.nio.file.Path;
 import java.io.BufferedReader;
@@ -52,7 +54,7 @@ import java.util.HashSet;
  * A set of utility methods used to interact with the CTA's API.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 11, 2021
+ * @version December 14, 2021
  */
 public final class ChicagoTransitAuthority {
     /**
@@ -74,11 +76,21 @@ public final class ChicagoTransitAuthority {
     } //ChicagoTransitAuthority
 
     /**
-     * Returns the current {@link Route}s of the Chicago Transit Authority.
+     * Returns the {@link Route}s with the specified names of the Chicago Transit Authority. If no route names are
+     * provided, all routes are returned.
      *
-     * @return the current {@link Route}s of the Chicago Transit Authority
+     * @param routeNames the {@link Route} names to be used in the operation
+     * @return the {@link Route}s with the specified names of the Chicago Transit Authority
+     * @throws NullPointerException if the specified array of route names or a route name in the specified array is
+     * {@code null}
      */
-    public static Set<Route> getRoutes() {
+    public static Set<Route> getRoutes(String... routeNames) {
+        Objects.requireNonNull(routeNames, "the specified array of route names is null");
+
+        Arrays.stream(routeNames)
+              .forEach(routeName -> Objects.requireNonNull(routeName,
+                                                           "a route name is the specified array is null"));
+
         Properties properties = new Properties();
 
         String fileName = "src/main/resources/api-key.properties";
@@ -106,11 +118,24 @@ public final class ChicagoTransitAuthority {
             return Set.of();
         } //end if
 
-        String uriTemplate = """
-                             http://www.lapi.transitchicago.com/api/1.0/ttpositions.aspx\
-                             ?key=%s&rt=red&rt=blue&rt=brn&rt=g&rt=org&rt=p&rt=pink&rt=y&outputType=JSON""";
+        String uriString;
 
-        String uriString = uriTemplate.formatted(apiKey);
+        if (routeNames.length == 0) {
+            uriString = """
+                        http://www.lapi.transitchicago.com/api/1.0/ttpositions.aspx\
+                        ?key=%s&rt=red&rt=blue&rt=brn&rt=g&rt=org&rt=p&rt=pink&rt=y\
+                        &outputType=JSON""".formatted(apiKey);
+        } else {
+            String routeNamesString = Arrays.stream(routeNames)
+                                            .map(String::toLowerCase)
+                                            .map("rt=%s"::formatted)
+                                            .reduce("%s&%s"::formatted)
+                                            .get();
+
+            uriString = """
+                        http://www.lapi.transitchicago.com/api/1.0/ttpositions.aspx\
+                        ?key=%s&%s&outputType=JSON""".formatted(apiKey, routeNamesString);
+        } //end if
 
         URI uri = URI.create(uriString);
 
