@@ -26,7 +26,6 @@ package com.cta4j;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Set;
 import com.cta4j.model.Route;
@@ -55,7 +54,7 @@ public final class Controller {
      *
      * @return a JSON response containing information about routes
      */
-    @GetMapping(value = "get-routes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping("get-routes")
     public String getRoutes(@RequestParam(name = "route", required = false) String[] routeNames) {
         if (routeNames == null) {
             routeNames = new String[0];
