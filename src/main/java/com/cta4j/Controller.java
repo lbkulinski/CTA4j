@@ -32,7 +32,7 @@ import com.cta4j.model.Route;
 import java.util.Map;
 import com.cta4j.model.Color;
 import com.cta4j.model.Train;
-import java.util.TreeMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import com.google.gson.GsonBuilder;
 import com.cta4j.model.adapters.TrainTypeAdapter;
@@ -45,7 +45,7 @@ import com.google.gson.JsonElement;
  * A controller of the CTA4j application.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 14, 2021
+ * @version December 17, 2021
  */
 @RestController
 public final class Controller {
@@ -62,7 +62,7 @@ public final class Controller {
 
         Set<Route> routes = ChicagoTransitAuthority.getRoutes(routeNames);
 
-        Map<Color, Set<Train>> colorToTrains = new TreeMap<>();
+        Map<Color, Set<Train>> colorToTrains = new HashMap<>();
 
         for (Route route : routes) {
             for (Train train : route.trains()) {
