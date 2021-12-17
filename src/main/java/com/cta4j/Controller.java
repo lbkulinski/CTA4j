@@ -129,7 +129,7 @@ public final class Controller {
         boolean approaching = train.approaching();
 
         if (approaching) {
-            String approachingString = "Approaching\n";
+            String approachingString = "    Approaching\n";
 
             trainString += approachingString;
         } //end if
@@ -137,7 +137,7 @@ public final class Controller {
         boolean delayed = train.delayed();
 
         if (delayed) {
-            String delayedString = "Delayed\n";
+            String delayedString = "    Delayed\n";
 
             trainString += delayedString;
         } //end if
