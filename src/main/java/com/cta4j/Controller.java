@@ -106,10 +106,10 @@ public final class Controller {
         Objects.requireNonNull(train, "the specified train is null");
 
         String format = """
-                            Run:         %d
-                            Destination: %s
-                            Next Stop:   %s
-                            Arrival:     %s
+                            %d -- Run
+                            %s -- Destination
+                            %s -- Next Stop
+                            %s -- Arrival
                         """;
 
         int run = train.run();
@@ -129,7 +129,7 @@ public final class Controller {
         boolean approaching = train.approaching();
 
         if (approaching) {
-            String approachingString = "    Approaching\n";
+            String approachingString = "Approaching\n";
 
             trainString += approachingString;
         } //end if
@@ -137,7 +137,7 @@ public final class Controller {
         boolean delayed = train.delayed();
 
         if (delayed) {
-            String delayedString = "    Delayed\n";
+            String delayedString = "Delayed\n";
 
             trainString += delayedString;
         } //end if
