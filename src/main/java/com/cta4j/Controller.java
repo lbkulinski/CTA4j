@@ -185,8 +185,6 @@ public final class Controller {
 
         formattedString = formattedString.strip();
 
-        System.out.println(formattedString);
-
         JsonObject jsonObject = new JsonObject();
 
         String property = "formatted_string";
