@@ -26,8 +26,9 @@ package com.cta4j;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import java.util.Set;
+import com.cta4j.model.Train;
 import com.cta4j.model.Route;
+import java.util.Set;
 import java.util.Objects;
 import java.util.Arrays;
 import java.util.Properties;
@@ -38,12 +39,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpClient;
+import java.io.UncheckedIOException;
 import java.net.http.HttpResponse;
 import com.google.gson.GsonBuilder;
-import com.google.gson.Gson;
-import com.cta4j.model.Train;
 import com.cta4j.model.adapters.TrainTypeAdapter;
-import com.cta4j.model.adapters.RouteTypeAdapter;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.JsonElement;
@@ -54,7 +54,7 @@ import java.util.HashSet;
  * A set of utility methods used to interact with the CTA's API.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 14, 2021
+ * @version December 27, 2021
  */
 public final class ChicagoTransitAuthority {
     /**
@@ -76,15 +76,16 @@ public final class ChicagoTransitAuthority {
     } //ChicagoTransitAuthority
 
     /**
-     * Returns the {@link Route}s with the specified names of the Chicago Transit Authority. If no route names are
-     * provided, all routes are returned.
+     * Returns the {@link Train}s using the specified map ID and route names of the Chicago Transit Authority. If no
+     * route names are provided, all routes are returned.
      *
+     * @param mapId the map ID to be used in the operation
      * @param routeNames the {@link Route} names to be used in the operation
-     * @return the {@link Route}s with the specified names of the Chicago Transit Authority
+     * @return the {@link Train}s using the specified map ID and route names of the Chicago Transit Authority
      * @throws NullPointerException if the specified array of route names or a route name in the specified array is
      * {@code null}
      */
-    public static Set<Route> getRoutes(String... routeNames) {
+    public static Set<Train> getTrains(int mapId, String... routeNames) {
         Objects.requireNonNull(routeNames, "the specified array of route names is null");
 
         Arrays.stream(routeNames)
@@ -122,9 +123,8 @@ public final class ChicagoTransitAuthority {
 
         if (routeNames.length == 0) {
             uriString = """
-                        http://www.lapi.transitchicago.com/api/1.0/ttpositions.aspx\
-                        ?key=%s&rt=red&rt=blue&rt=brn&rt=g&rt=org&rt=p&rt=pink&rt=y\
-                        &outputType=JSON""".formatted(apiKey);
+                        https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx\
+                        ?key=%s&mapid=%s&outputType=JSON""".formatted(apiKey, mapId);
         } else {
             String routeNamesString = Arrays.stream(routeNames)
                                             .map(String::toLowerCase)
@@ -133,17 +133,47 @@ public final class ChicagoTransitAuthority {
                                             .get();
 
             uriString = """
-                        http://www.lapi.transitchicago.com/api/1.0/ttpositions.aspx\
-                        ?key=%s&%s&outputType=JSON""".formatted(apiKey, routeNamesString);
+                        https://www.lapi.transitchicago.com/api/1.0/ttpositions.aspx\
+                        ?key=%s&mapid=%s&%s&outputType=JSON""".formatted(apiKey, mapId, routeNamesString);
         } //end if
 
-        URI uri = URI.create(uriString);
+        URI uri;
 
-        HttpRequest request = HttpRequest.newBuilder()
-                                         .uri(uri)
-                                         .build();
+        try {
+            uri = URI.create(uriString);
+        } catch (IllegalArgumentException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the API URI");
 
-        HttpClient httpClient = HttpClient.newHttpClient();
+            return Set.of();
+        }//end try catch
+
+        HttpRequest request;
+
+        try {
+            request = HttpRequest.newBuilder(uri)
+                                 .GET()
+                                 .build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the API request");
+
+            return Set.of();
+        } //end try catch
+
+        HttpClient httpClient;
+
+        try {
+            httpClient = HttpClient.newHttpClient();
+        } catch (UncheckedIOException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the HTTP client");
+
+            return Set.of();
+        } //end try catch
 
         HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString();
 
@@ -154,7 +184,7 @@ public final class ChicagoTransitAuthority {
         } catch (IOException | InterruptedException e) {
             LOGGER.atError()
                   .withThrowable(e)
-                  .log("Error in requesting the CTA's train data");
+                  .log("Error in sending the API request");
 
             return Set.of();
         } //end try catch
@@ -163,9 +193,9 @@ public final class ChicagoTransitAuthority {
 
         GsonBuilder gsonBuilder = new GsonBuilder();
 
-        gsonBuilder.registerTypeAdapter(Train.class, new TrainTypeAdapter());
+        TrainTypeAdapter typeAdapter = new TrainTypeAdapter();
 
-        gsonBuilder.registerTypeAdapter(Route.class, new RouteTypeAdapter());
+        gsonBuilder.registerTypeAdapter(Train.class, typeAdapter);
 
         Gson gson = gsonBuilder.create();
 
@@ -176,14 +206,14 @@ public final class ChicagoTransitAuthority {
         } catch (JsonSyntaxException e) {
             LOGGER.atError()
                   .withThrowable(e)
-                  .log("Error in parsing the response from the CTA API");
+                  .log("Error in parsing the response from the API");
 
             return Set.of();
         } //end try catch
 
         if (!jsonObject.has("ctatt")) {
             LOGGER.atError()
-                  .log("Error in parsing the response from the CTA API. The member \"ctatt\" is missing");
+                  .log("Error in parsing the response from the API. The member \"ctatt\" is missing");
 
             return Set.of();
         } //end if
@@ -192,51 +222,49 @@ public final class ChicagoTransitAuthority {
 
         if ((ctattElement == null) || !ctattElement.isJsonObject()) {
             LOGGER.atError()
-                  .log("""
-                       Error in parsing the response from the CTA API. The member "ctatt" is null or not an object""");
+                  .log("Error in parsing the response from the API. The member \"ctatt\" is null or not an object");
 
             return Set.of();
         } //end if
 
         JsonObject ctattObject = ctattElement.getAsJsonObject();
 
-        if (!ctattObject.has("route")) {
+        if (!ctattObject.has("eta")) {
             LOGGER.atError()
-                  .log("Error in parsing the response from the CTA API. The member \"route\" is missing");
+                  .log("Error in parsing the response from the API. The member \"eta\" is missing");
 
             return Set.of();
         } //end if
 
-        JsonElement routeElement = ctattObject.get("route");
+        JsonElement etaElement = ctattObject.get("eta");
 
-        if ((routeElement == null) || !routeElement.isJsonArray()) {
+        if ((etaElement == null) || !etaElement.isJsonArray()) {
             LOGGER.atError()
-                  .log("""
-                       Error in parsing the response from the CTA API. The member "route" is null or not an array""");
+                  .log("Error in parsing the response from the API. The member \"eta\" is null or not an array");
 
             return Set.of();
         } //end if
 
-        JsonArray routeArray = routeElement.getAsJsonArray();
+        JsonArray etaArray = etaElement.getAsJsonArray();
 
-        Set<Route> routes = new HashSet<>();
+        Set<Train> trains = new HashSet<>();
 
-        for (JsonElement jsonElement : routeArray) {
-            Route route;
+        for (JsonElement jsonElement : etaArray) {
+            Train train;
 
             try {
-                route = gson.fromJson(jsonElement, Route.class);
+                train = gson.fromJson(jsonElement, Train.class);
             } catch (JsonSyntaxException e) {
                 LOGGER.atError()
                       .withThrowable(e)
-                      .log("Error in parsing the response from the CTA API. A route could not be parsed");
+                      .log("Error in parsing a train in the response from the API");
 
-                return Set.of();
+                continue;
             } //end try catch
 
-            routes.add(route);
+            trains.add(train);
         } //end for
 
-        return routes;
-    } //getRoutes
+        return trains;
+    } //getTrains
 }

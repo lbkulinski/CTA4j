@@ -24,36 +24,50 @@
 
 package com.cta4j.model;
 
-import java.util.Set;
-import java.util.Objects;
-import java.util.HashSet;
-import java.util.Collections;
-
 /**
  * A route of the Chicago Transit Authority.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 11, 2021
- * @param color the color of this route
- * @param trains the {@link Set} of {@link Train}s of this route
+ * @version December 27, 2021
  */
-public record Route(Color color, Set<Train> trains) {
+public enum Route {
     /**
-     * Constructs an instance of the {@link Route} class.
-     *
-     * @param color the color to be used in construction
-     * @param trains the {@link Set} of {@link Train}s to be used in construction
-     * @throws NullPointerException if the specified color or {@link Set} of {@link Train}s is {@code null}
+     * The singleton instance representing the red {@link Route}.
      */
-    public Route {
-        Objects.requireNonNull(color, "the specified color is null");
+    RED,
 
-        Objects.requireNonNull(trains, "the specified Set of Trains is null");
+    /**
+     * The singleton instance representing the blue {@link Route}.
+     */
+    BLUE,
 
-        trains.forEach(train -> Objects.requireNonNull(train, "a Train in the specified Set is null"));
+    /**
+     * The singleton instance representing the brown {@link Route}.
+     */
+    BROWN,
 
-        trains = new HashSet<>(trains);
+    /**
+     * The singleton instance representing the green {@link Route}.
+     */
+    GREEN,
 
-        trains = Collections.unmodifiableSet(trains);
-    } //Route
+    /**
+     * The singleton instance representing the orange {@link Route}.
+     */
+    ORANGE,
+
+    /**
+     * The singleton instance representing the purple {@link Route}.
+     */
+    PURPLE,
+
+    /**
+     * The singleton instance representing the pink {@link Route}.
+     */
+    PINK,
+
+    /**
+     * The singleton instance representing the yellow {@link Route}.
+     */
+    YELLOW
 }

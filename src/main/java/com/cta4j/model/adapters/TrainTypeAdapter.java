@@ -29,17 +29,20 @@ import com.cta4j.model.Train;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Objects;
+import com.cta4j.model.Route;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import com.google.gson.stream.JsonReader;
 import java.util.Map;
 import java.util.HashMap;
 import com.google.gson.stream.JsonToken;
-import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 /**
  * A type adapter for the {@link Train} class.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 11, 2021
+ * @version December 27, 2021
  */
 public final class TrainTypeAdapter extends TypeAdapter<Train> {
     /**
@@ -71,52 +74,112 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
 
         jsonWriter.value(rnString);
 
+        jsonWriter.name("rt");
+
+        Route route = train.route();
+
+        String rt = switch (route) {
+            case RED -> "Red";
+            case BLUE -> "Blue";
+            case BROWN -> "Brn";
+            case GREEN -> "G";
+            case ORANGE -> "Org";
+            case PURPLE -> "P";
+            case PINK -> "Pink";
+            case YELLOW -> "Y";
+        };
+
+        jsonWriter.value(rt);
+
         jsonWriter.name("destNm");
 
-        jsonWriter.value(train.destination());
+        String destination = train.destination();
 
-        jsonWriter.name("nextStaNm");
+        jsonWriter.value(destination);
 
-        jsonWriter.value(train.nextStop());
+        jsonWriter.name("staNm");
+
+        String station = train.station();
+
+        jsonWriter.value(station);
+
+        jsonWriter.name("stpDe");
+
+        String description = train.description();
+
+        jsonWriter.value(description);
+
+        jsonWriter.name("prdt");
+
+        LocalDateTime predictionTime = train.predictionTime();
+
+        String predictionTimeString = predictionTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        jsonWriter.value(predictionTimeString);
 
         jsonWriter.name("arrT");
 
-        String arrTString = train.estimatedArrival()
-                                 .toString();
+        LocalDateTime arrivalTime = train.arrivalTime();
 
-        jsonWriter.value(arrTString);
+        String arrivalTimeString = arrivalTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        jsonWriter.value(arrivalTimeString);
 
         jsonWriter.name("isApp");
 
-        boolean isApp = train.approaching();
+        boolean due = train.due();
 
-        String isAppString = isApp ? "1" : "0";
+        String dueString = due ? "1" : "0";
 
-        jsonWriter.value(isAppString);
+        jsonWriter.value(dueString);
+
+        jsonWriter.name("isSch");
+
+        boolean scheduled = train.scheduled();
+
+        String scheduledString = scheduled ? "1" : "0";
+
+        jsonWriter.value(scheduledString);
+
+        jsonWriter.name("isFlt");
+
+        boolean fault = train.fault();
+
+        String faultString = fault ? "1" : "0";
+
+        jsonWriter.value(faultString);
 
         jsonWriter.name("isDly");
 
-        boolean isDly = train.delayed();
+        boolean delayed = train.delayed();
 
-        String isDlyString = isDly ? "1" : "0";
+        String delayedString = delayed ? "1" : "0";
 
-        jsonWriter.value(isDlyString);
+        jsonWriter.value(delayedString);
 
         jsonWriter.name("lat");
 
-        Double lat = train.latitude();
+        double latitude = train.latitude();
 
-        String latString = String.valueOf(lat);
+        String latitudeString = String.valueOf(latitude);
 
-        jsonWriter.value(latString);
+        jsonWriter.value(latitudeString);
 
         jsonWriter.name("lon");
 
-        Double lon = train.longitude();
+        double longitude = train.longitude();
 
-        String lonString = String.valueOf(lon);
+        String longitudeString = String.valueOf(longitude);
 
-        jsonWriter.value(lonString);
+        jsonWriter.value(longitudeString);
+
+        jsonWriter.name("heading");
+
+        int heading = train.heading();
+
+        String headingString = String.valueOf(heading);
+
+        jsonWriter.value(headingString);
 
         jsonWriter.endObject();
     } //writeTrain
@@ -149,36 +212,107 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
                 case "rn" -> {
                     String runString = jsonReader.nextString();
 
-                    int run = Integer.parseInt(runString);
+                    int run;
+
+                    try {
+                        run = Integer.parseInt(runString);
+                    } catch (NumberFormatException e) {
+                        throw new IOException("the response includes a malformed run");
+                    } //end try catch
 
                     keyToValue.put("run", run);
                 } //case "rn"
+                case "rt" -> {
+                    String routeString = jsonReader.nextString();
+
+                    routeString = routeString.toLowerCase();
+
+                    Route route = switch (routeString) {
+                        case "red" -> Route.RED;
+                        case "blue" -> Route.BLUE;
+                        case "brn" -> Route.BROWN;
+                        case "g" -> Route.GREEN;
+                        case "org" -> Route.ORANGE;
+                        case "p", "pexp" -> Route.PURPLE;
+                        case "pink" -> Route.PINK;
+                        case "y" -> Route.YELLOW;
+                        default -> {
+                            String errorMessage = "the response includes a novel route: %s".formatted(routeString);
+
+                            throw new IOException(errorMessage);
+                        } //default
+                    };
+
+                    keyToValue.put("route", route);
+                } //case "rt"
                 case "destNm" -> {
                     String destination = jsonReader.nextString();
 
                     keyToValue.put("destination", destination);
                 } //case "destNm"
-                case "nextStaNm" -> {
-                    String nextStop = jsonReader.nextString();
+                case "staNm" -> {
+                    String station = jsonReader.nextString();
 
-                    keyToValue.put("nextStop", nextStop);
-                } //case "nextStaNm"
+                    keyToValue.put("station", station);
+                } //case "staNm"
+                case "stpDe" -> {
+                    String description = jsonReader.nextString();
+
+                    keyToValue.put("description", description);
+                } //case "stpDe"
+                case "prdt" -> {
+                    String predictionTimeString = jsonReader.nextString();
+
+                    LocalDateTime predictionTime;
+
+                    try {
+                        predictionTime = LocalDateTime.parse(predictionTimeString);
+                    } catch (DateTimeParseException e) {
+                        throw new IOException("the response includes a malformed prediction time");
+                    } //end try catch
+
+                    keyToValue.put("predictionTime", predictionTime);
+                } //case "prdt"
                 case "arrT" -> {
-                    String estimatedArrivalString = jsonReader.nextString();
+                    String arrivalTimeString = jsonReader.nextString();
 
-                    LocalDateTime estimatedArrival = LocalDateTime.parse(estimatedArrivalString);
+                    LocalDateTime arrivalTime;
 
-                    keyToValue.put("estimatedArrival", estimatedArrival);
+                    try {
+                        arrivalTime = LocalDateTime.parse(arrivalTimeString);
+                    } catch (DateTimeParseException e) {
+                        throw new IOException("the response includes a malformed arrival time");
+                    } //end try catch
+
+                    keyToValue.put("arrivalTime", arrivalTime);
                 } //case "arrT"
                 case "isApp" -> {
-                    String approachingString = jsonReader.nextString();
+                    String dueString = jsonReader.nextString();
 
-                    String approachingTrue = "1";
+                    String dueTrue = "1";
 
-                    boolean approaching = Objects.equals(approachingString, approachingTrue);
+                    boolean due = Objects.equals(dueString, dueTrue);
 
-                    keyToValue.put("approaching", approaching);
+                    keyToValue.put("due", due);
                 } //case "isApp"
+                case "isSch" -> {
+                    String scheduledString = jsonReader.nextString();
+
+                    String scheduledTrue = "1";
+
+                    boolean scheduled = Objects.equals(scheduledString, scheduledTrue);
+
+                    keyToValue.put("scheduled", scheduled);
+                } //case "isSch"
+                case "isFlt" -> {
+                    String faultString = jsonReader.nextString();
+
+                    String faultTrue = "1";
+
+                    boolean fault = Objects.equals(faultString, faultTrue);
+
+                    keyToValue.put("fault", fault);
+                } //case "isFlt"
                 case "isDly" -> {
                     String delayedString = jsonReader.nextString();
 
@@ -191,17 +325,42 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
                 case "lat" -> {
                     String latitudeString = jsonReader.nextString();
 
-                    double latitude = Double.parseDouble(latitudeString);
+                    double latitude;
+
+                    try {
+                        latitude = Double.parseDouble(latitudeString);
+                    } catch (NumberFormatException e) {
+                        throw new IOException("the response includes a malformed latitude");
+                    } //end try catch
 
                     keyToValue.put("latitude", latitude);
                 } //case "lat"
                 case "lon" -> {
                     String longitudeString = jsonReader.nextString();
 
-                    double longitude = Double.parseDouble(longitudeString);
+                    double longitude;
+
+                    try {
+                        longitude = Double.parseDouble(longitudeString);
+                    } catch (NumberFormatException e) {
+                        throw new IOException("the response includes a malformed longitude");
+                    } //end try catch
 
                     keyToValue.put("longitude", longitude);
                 } //case "lon"
+                case "heading" -> {
+                    String headingString = jsonReader.nextString();
+
+                    int heading;
+
+                    try {
+                        heading = Integer.parseInt(headingString);
+                    } catch (NumberFormatException e) {
+                        throw new IOException("the response includes a malformed heading");
+                    } //end try catch
+
+                    keyToValue.put("heading", heading);
+                } //case "heading"
                 default -> jsonReader.nextString();
             } //end switch
         } //end while
@@ -214,28 +373,58 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
             throw new IOException("the member \"rn\" was not included in the response");
         } //end if
 
+        Route route = (Route) keyToValue.get("route");
+
+        if (route == null) {
+            throw new IOException("the member \"rt\" was not included in the response");
+        } //end if
+
         String destination = (String) keyToValue.get("destination");
 
         if (destination == null) {
             throw new IOException("the member \"destNm\" was not included in the response");
         } //end if
 
-        String nextStop = (String) keyToValue.get("nextStop");
+        String station = (String) keyToValue.get("station");
 
-        if (nextStop == null) {
-            throw new IOException("the member \"nextStaNm\" was not included in the response");
+        if (station == null) {
+            throw new IOException("the member \"staNm\" was not included in the response");
         } //end if
 
-        LocalDateTime estimatedArrival = (LocalDateTime) keyToValue.get("estimatedArrival");
+        String description = (String) keyToValue.get("description");
 
-        if (estimatedArrival == null) {
+        if (description == null) {
+            throw new IOException("the member \"stpDe\" was not included in the response");
+        } //end if
+
+        LocalDateTime predictionTime = (LocalDateTime) keyToValue.get("predictionTime");
+
+        if (predictionTime == null) {
+            throw new IOException("the member \"prdt\" was not included in the response");
+        } //end if
+
+        LocalDateTime arrivalTime = (LocalDateTime) keyToValue.get("arrivalTime");
+
+        if (arrivalTime == null) {
             throw new IOException("the member \"arrT\" was not included in the response");
         } //end if
 
-        Boolean approaching = (Boolean) keyToValue.get("approaching");
+        Boolean due = (Boolean) keyToValue.get("due");
 
-        if (approaching == null) {
+        if (due == null) {
             throw new IOException("the member \"isApp\" was not included in the response");
+        } //end if
+
+        Boolean scheduled = (Boolean) keyToValue.get("scheduled");
+
+        if (scheduled == null) {
+            throw new IOException("the member \"isSch\" was not included in the response");
+        } //end if
+
+        Boolean fault = (Boolean) keyToValue.get("fault");
+
+        if (fault == null) {
+            throw new IOException("the member \"isFlt\" was not included in the response");
         } //end if
 
         Boolean delayed = (Boolean) keyToValue.get("delayed");
@@ -256,7 +445,14 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
             throw new IOException("the member \"lon\" was not included in the response");
         } //end if
 
-        return new Train(run, destination, nextStop, estimatedArrival, approaching, delayed, latitude, longitude);
+        Integer heading = (Integer) keyToValue.get("heading");
+
+        if (heading == null) {
+            throw new IOException("the member \"heading\" was not included in the response");
+        } //end if
+
+        return new Train(run, route, destination, station, description, predictionTime, arrivalTime, due, scheduled,
+                         fault, delayed, latitude, longitude, heading);
     } //readTrain
 
     /**

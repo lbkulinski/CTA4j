@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Set;
 import com.cta4j.model.Route;
 import java.util.Map;
-import com.cta4j.model.Color;
 import com.cta4j.model.Train;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,32 +44,25 @@ import com.google.gson.JsonElement;
  * A controller of the CTA4j application.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 17, 2021
+ * @version December 27, 2021
  */
 @RestController
 public final class Controller {
     /**
-     * Returns a JSON response containing information about routes.
-     *
-     * @return a JSON response containing information about routes
+     * Returns a JSON response containing information about trains using the specified map ID and route names.
+     * 
+     * @param mapId the map ID to be used in the operation
+     * @param routeNames the route names to be used in the operation
+     * @return a JSON response containing information about trains using the specified map ID and route names
      */
-    @GetMapping("get-routes")
-    public String getRoutes(@RequestParam(name = "route", required = false) String[] routeNames) {
+    @GetMapping("get-trains")
+    public String getTrains(@RequestParam(name = "map_id") int mapId,
+                            @RequestParam(name = "route", required = false) String[] routeNames) {
         if (routeNames == null) {
             routeNames = new String[0];
         } //end if
 
-        Set<Route> routes = ChicagoTransitAuthority.getRoutes(routeNames);
-
-        Map<Color, Set<Train>> colorToTrains = new HashMap<>();
-
-        for (Route route : routes) {
-            for (Train train : route.trains()) {
-                Set<Train> trains = colorToTrains.computeIfAbsent(route.color(), key -> new HashSet<>());
-
-                trains.add(train);
-            } //end if
-        } //end for
+        Set<Train> trains = ChicagoTransitAuthority.getTrains(mapId, routeNames);
 
         GsonBuilder gsonBuilder = new GsonBuilder();
 
@@ -79,21 +71,13 @@ public final class Controller {
         Gson gson = gsonBuilder.setPrettyPrinting()
                                .create();
 
-        JsonObject response = new JsonObject();
+        JsonArray response = new JsonArray();
 
-        colorToTrains.forEach((color, trains) -> {
-            JsonArray trainArray = new JsonArray();
+        for (Train train : trains) {
+            JsonElement element = gson.toJsonTree(train, Train.class);
 
-            trains.forEach(train -> {
-                JsonElement trainElement = gson.toJsonTree(train, Train.class);
-
-                trainArray.add(trainElement);
-            });
-
-            String colorString = color.toString();
-
-            response.add(colorString, trainArray);
-        });
+            response.add(element);
+        } //end for
 
         return gson.toJson(response);
     } //getRoutes
