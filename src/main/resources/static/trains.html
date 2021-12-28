@@ -7,15 +7,22 @@
         html {
             background-color: #111517;
         }
+
         body {
-            width: 35em;
-            margin: 0 auto;
+            /*width: 35em;*/
+            /*margin: 0 auto;*/
             font-family: Tahoma, Verdana, Arial, sans-serif;
             color: #e8e6e3;
         }
+
         table, th, td {
             text-align: left;
             border: 1px solid #e8e6e3;
+        }
+
+        .center {
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
@@ -86,7 +93,8 @@
             return null;
         } //end if
 
-        let route = $("<td>").text(train.route);
+        let route = $("<td>").text(train.route)
+                             .css("color", "red");
 
         let destination = $("<td>").text(train.destination);
 
@@ -146,7 +154,8 @@
             tableBody.append(tableRow);
         });
 
-        let table = $("<table>").append(tableHead, tableBody);
+        let table = $("<table>").addClass("center")
+                                .append(tableHead, tableBody);
 
         div_trains.html(table);
     } //showTable
