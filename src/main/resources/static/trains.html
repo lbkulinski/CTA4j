@@ -15,6 +15,36 @@
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
+    function compareTrains(train0, train1) {
+        if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("arrival_time")) {
+            return 0;
+        } //end if
+
+        if (!train1.hasOwnProperty("route")|| !train1.hasOwnProperty("arrival_time")) {
+            return 0;
+        } //end if
+
+        let route0 = train0.route;
+
+        let date0 = new Date(train0.arrival_time);
+
+        let route1 = train1.route;
+
+        let date1 = new Date(train1.arrival_time);
+
+        if (route0 < route1) {
+            return -1;
+        } else if (route0 > route1) {
+            return 1;
+        } else if (date0 < date1) {
+            return -1;
+        } else if (date0 === date1) {
+            return 0;
+        } else {
+            return 1;
+        } //end if
+    } //compareTrains
+
     function getTableHead() {
         let route = $("<th>").text("Route");
 
@@ -139,27 +169,7 @@
             "success": function (response) {
                 let trains = JSON.parse(response);
 
-                trains.sort(function (train0, train1) {
-                    if (!train0.hasOwnProperty("route")) {
-                        return 0;
-                    } //end if
-
-                    if (!train1.hasOwnProperty("route")) {
-                        return 0;
-                    } //end if
-
-                    let route0 = train0.route;
-
-                    let route1 = train1.route;
-
-                    if (route0 < route1) {
-                        return -1;
-                    } else if (route0 === route1) {
-                        return 0;
-                    } else {
-                        return 1;
-                    } //end if
-                });
+                trains.sort(compareTrains);
 
                 showTable(trains, div_trains);
             },
@@ -170,6 +180,8 @@
     } //updateTrains
 
     $(function () {
+        updateTrains();
+
         let timeout = 60000;
 
         setInterval(updateTrains, timeout);
