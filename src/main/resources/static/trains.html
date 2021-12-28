@@ -181,13 +181,9 @@
         let table = $("<table>");
 
         if (station) {
-            let title = $("#title");
+            let titleText = `CTA4j Train Tracker -- ${station}`;
 
-            let titleText = title.text();
-
-            titleText = `${titleText} -- ${station}`;
-
-            title.text(titleText);
+            $("#title").text(titleText);
 
             let caption = $("<caption>").text(station);
 
