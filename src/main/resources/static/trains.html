@@ -111,7 +111,7 @@
         div_trains.html(table);
     } //showTable
 
-    $(function () {
+    function updateTrains() {
         let urlParameters = new URLSearchParams(window.location.search);
 
         let div_trains = $("#div_trains");
@@ -167,6 +167,12 @@
                 div_trains.text("Error: The train data could not be retrieved");
             }
         });
+    } //updateTrains
+
+    $(function () {
+        let timeout = 60000;
+
+        setInterval(updateTrains, timeout);
     });
 </script>
 </html>
