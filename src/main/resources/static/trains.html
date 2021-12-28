@@ -18,6 +18,11 @@
             margin-right: auto;
         }
 
+        caption {
+            caption-side: top;
+            text-align: left;
+        }
+
         th {
             text-align: left;
         }
@@ -33,6 +38,8 @@
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
+    let station = null;
+
     function compareTrains(train0, train1) {
         if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("arrival_time")) {
             return 0;
@@ -92,6 +99,10 @@
 
         if (error) {
             return null;
+        } //end if
+
+        if (train.hasOwnProperty("station")) {
+            station = train.station;
         } //end if
 
         let route = $("<td>").text(train.route)
@@ -155,7 +166,15 @@
             tableBody.append(tableRow);
         });
 
-        let table = $("<table>").append(tableHead, tableBody);
+        let table = $("<table>");
+
+        if (station) {
+            let caption = $("<caption>").text(station);
+
+            table.append(caption);
+        } //end if
+
+        table.append(tableHead, tableBody);
 
         div_trains.html(table);
     } //showTable
