@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Trains</title>
+    <title id="title">CTA4j Train Tracker</title>
     <style>
         html {
             background-color: #111517;
@@ -181,6 +181,14 @@
         let table = $("<table>");
 
         if (station) {
+            let title = $("#title");
+
+            let titleText = title.text();
+
+            titleText = `${titleText} -- ${station}`;
+
+            title.text(titleText);
+
             let caption = $("<caption>").text(station);
 
             table.append(caption);
