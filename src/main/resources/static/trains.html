@@ -43,25 +43,35 @@
     let station = null;
 
     function compareTrains(train0, train1) {
-        if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("arrival_time")) {
+        if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("destination") ||
+            !train0.hasOwnProperty("arrival_time")) {
             return 0;
         } //end if
 
-        if (!train1.hasOwnProperty("route")|| !train1.hasOwnProperty("arrival_time")) {
+        if (!train1.hasOwnProperty("route") || !train1.hasOwnProperty("destination") ||
+            !train1.hasOwnProperty("arrival_time")) {
             return 0;
         } //end if
 
         let route0 = train0.route;
 
+        let destination0 = train0.destination;
+
         let date0 = new Date(train0.arrival_time);
 
         let route1 = train1.route;
+
+        let destination1 = train1.destination;
 
         let date1 = new Date(train1.arrival_time);
 
         if (route0 < route1) {
             return -1;
         } else if (route0 > route1) {
+            return 1;
+        } else if (destination0 < destination1) {
+            return -1;
+        } else if (destination0 > destination1) {
             return 1;
         } else if (date0 < date1) {
             return -1;
