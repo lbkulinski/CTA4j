@@ -9,14 +9,15 @@
         }
 
         body {
-            /*width: 35em;*/
-            /*margin: 0 auto;*/
             font-family: Tahoma, Verdana, Arial, sans-serif;
             color: #e8e6e3;
         }
 
-        table, th, td {
+        th {
             text-align: left;
+        }
+
+        table, th, td {
             border: 1px solid #e8e6e3;
         }
 
@@ -130,11 +131,13 @@
 
         let dueHtml = train.due ? checkMark : "";
 
-        let due = $("<td>").html(dueHtml);
+        let due = $("<td>").css("text-align", "center")
+                           .html(dueHtml);
 
         let delayedHtml = train.delayed ? checkMark : "";
 
-        let delayed = $("<td>").html(delayedHtml);
+        let delayed = $("<td>").css("text-align", "center")
+                               .html(delayedHtml);
 
         return $("<tr>").append(route, destination, run, arrivalTime, due, delayed);
     } //getTableRow
