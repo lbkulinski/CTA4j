@@ -117,13 +117,9 @@
 
         let padLength = 2;
 
-        let hourPadValue = " ";
+        let padValue = "0";
 
-        hour = String(hour).padStart(padLength, hourPadValue);
-
-        let minutePadValue = "0";
-
-        minute = String(minute).padStart(padLength, minutePadValue);
+        minute = String(minute).padStart(padLength, padValue);
 
         let dateString = `${hour}:${minute} ${ampm}`
 
