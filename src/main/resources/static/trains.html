@@ -13,17 +13,17 @@
             color: #e8e6e3;
         }
 
+        table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         th {
             text-align: left;
         }
 
         table, th, td {
             border: 1px solid #e8e6e3;
-        }
-
-        .center {
-            margin-left: auto;
-            margin-right: auto;
         }
     </style>
 </head>
@@ -155,8 +155,7 @@
             tableBody.append(tableRow);
         });
 
-        let table = $("<table>").addClass("center")
-                                .append(tableHead, tableBody);
+        let table = $("<table>").append(tableHead, tableBody);
 
         div_trains.html(table);
     } //showTable
