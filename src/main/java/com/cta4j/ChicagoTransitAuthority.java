@@ -54,7 +54,7 @@ import java.util.HashSet;
  * A set of utility methods used to interact with the CTA's API.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 27, 2021
+ * @version December 28, 2021
  */
 public final class ChicagoTransitAuthority {
     /**
@@ -133,7 +133,7 @@ public final class ChicagoTransitAuthority {
                                             .get();
 
             uriString = """
-                        https://www.lapi.transitchicago.com/api/1.0/ttpositions.aspx\
+                        https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx\
                         ?key=%s&mapid=%s&%s&outputType=JSON""".formatted(apiKey, mapId, routeNamesString);
         } //end if
 

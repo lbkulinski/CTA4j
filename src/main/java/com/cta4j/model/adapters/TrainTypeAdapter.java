@@ -42,7 +42,7 @@ import java.time.format.DateTimeParseException;
  * A type adapter for the {@link Train} class.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 27, 2021
+ * @version December 28, 2021
  */
 public final class TrainTypeAdapter extends TypeAdapter<Train> {
     /**
@@ -66,50 +66,38 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
 
         jsonWriter.beginObject();
 
-        jsonWriter.name("rn");
+        jsonWriter.name("run");
 
-        int rn = train.run();
+        int run = train.run();
 
-        String rnString = String.valueOf(rn);
+        jsonWriter.value(run);
 
-        jsonWriter.value(rnString);
+        jsonWriter.name("route");
 
-        jsonWriter.name("rt");
+        String route = train.route()
+                            .toString();
 
-        Route route = train.route();
+        jsonWriter.value(route);
 
-        String rt = switch (route) {
-            case RED -> "Red";
-            case BLUE -> "Blue";
-            case BROWN -> "Brn";
-            case GREEN -> "G";
-            case ORANGE -> "Org";
-            case PURPLE -> "P";
-            case PINK -> "Pink";
-            case YELLOW -> "Y";
-        };
-
-        jsonWriter.value(rt);
-
-        jsonWriter.name("destNm");
+        jsonWriter.name("destination");
 
         String destination = train.destination();
 
         jsonWriter.value(destination);
 
-        jsonWriter.name("staNm");
+        jsonWriter.name("station");
 
         String station = train.station();
 
         jsonWriter.value(station);
 
-        jsonWriter.name("stpDe");
+        jsonWriter.name("description");
 
         String description = train.description();
 
         jsonWriter.value(description);
 
-        jsonWriter.name("prdt");
+        jsonWriter.name("prediction_time");
 
         LocalDateTime predictionTime = train.predictionTime();
 
@@ -117,7 +105,7 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
 
         jsonWriter.value(predictionTimeString);
 
-        jsonWriter.name("arrT");
+        jsonWriter.name("arrival_time");
 
         LocalDateTime arrivalTime = train.arrivalTime();
 
@@ -125,61 +113,47 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
 
         jsonWriter.value(arrivalTimeString);
 
-        jsonWriter.name("isApp");
+        jsonWriter.name("due");
 
         boolean due = train.due();
 
-        String dueString = due ? "1" : "0";
+        jsonWriter.value(due);
 
-        jsonWriter.value(dueString);
-
-        jsonWriter.name("isSch");
+        jsonWriter.name("scheduled");
 
         boolean scheduled = train.scheduled();
 
-        String scheduledString = scheduled ? "1" : "0";
+        jsonWriter.value(scheduled);
 
-        jsonWriter.value(scheduledString);
-
-        jsonWriter.name("isFlt");
+        jsonWriter.name("fault");
 
         boolean fault = train.fault();
 
-        String faultString = fault ? "1" : "0";
+        jsonWriter.value(fault);
 
-        jsonWriter.value(faultString);
-
-        jsonWriter.name("isDly");
+        jsonWriter.name("delayed");
 
         boolean delayed = train.delayed();
 
-        String delayedString = delayed ? "1" : "0";
+        jsonWriter.value(delayed);
 
-        jsonWriter.value(delayedString);
-
-        jsonWriter.name("lat");
+        jsonWriter.name("latitude");
 
         double latitude = train.latitude();
 
-        String latitudeString = String.valueOf(latitude);
+        jsonWriter.value(latitude);
 
-        jsonWriter.value(latitudeString);
-
-        jsonWriter.name("lon");
+        jsonWriter.name("longitude");
 
         double longitude = train.longitude();
 
-        String longitudeString = String.valueOf(longitude);
-
-        jsonWriter.value(longitudeString);
+        jsonWriter.value(longitude);
 
         jsonWriter.name("heading");
 
         int heading = train.heading();
 
-        String headingString = String.valueOf(heading);
-
-        jsonWriter.value(headingString);
+        jsonWriter.value(heading);
 
         jsonWriter.endObject();
     } //writeTrain

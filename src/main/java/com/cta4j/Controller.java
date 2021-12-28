@@ -28,15 +28,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Set;
-import com.cta4j.model.Route;
-import java.util.Map;
 import com.cta4j.model.Train;
-import java.util.HashMap;
-import java.util.HashSet;
 import com.google.gson.GsonBuilder;
 import com.cta4j.model.adapters.TrainTypeAdapter;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
@@ -44,7 +39,7 @@ import com.google.gson.JsonElement;
  * A controller of the CTA4j application.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 27, 2021
+ * @version December 28, 2021
  */
 @RestController
 public final class Controller {
@@ -56,8 +51,8 @@ public final class Controller {
      * @return a JSON response containing information about trains using the specified map ID and route names
      */
     @GetMapping("get-trains")
-    public String getTrains(@RequestParam(name = "map_id") int mapId,
-                            @RequestParam(name = "route", required = false) String[] routeNames) {
+    public String getTrains(@RequestParam(value = "map_id") int mapId,
+                            @RequestParam(value = "route[]", required = false) String[] routeNames) {
         if (routeNames == null) {
             routeNames = new String[0];
         } //end if
@@ -66,7 +61,9 @@ public final class Controller {
 
         GsonBuilder gsonBuilder = new GsonBuilder();
 
-        gsonBuilder.registerTypeAdapter(Train.class, new TrainTypeAdapter());
+        TrainTypeAdapter typeAdapter = new TrainTypeAdapter();
+
+        gsonBuilder.registerTypeAdapter(Train.class, typeAdapter);
 
         Gson gson = gsonBuilder.setPrettyPrinting()
                                .create();
