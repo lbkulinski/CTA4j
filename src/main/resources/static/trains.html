@@ -76,10 +76,10 @@
         let run = $("<th>").attr("scope", "col")
                            .text("Run");
 
-        let arrivalTime = $("<th>").attr("scope", "col")
-                                   .text("Arrival Time");
+        let eta = $("<th>").attr("scope", "col")
+                           .text("ETA");
 
-        return $("<thead>").append(route, destination, run, arrivalTime);
+        return $("<thead>").append(route, destination, run, eta);
     } //getTableHead
 
     function getTableRow(train) {
@@ -108,31 +108,31 @@
 
         let run = $("<td>").text(train.run);
 
-        let date = new Date(train.arrival_time);
+        let arrivalDate = new Date(train.arrival_time);
 
-        let hour = date.getHours();
+        let arrivalMillis = arrivalDate.getTime();
 
-        let minute = date.getMinutes();
+        let now = new Date();
 
-        let noon = 12;
+        let nowMillis = now.getTime();
 
-        let ampm = (hour >= noon) ? "PM" : "AM";
+        let difference = arrivalMillis - nowMillis;
 
-        if (hour > noon) {
-            hour -= 12;
+        let minuteMillis = 60000;
+
+        difference /= minuteMillis;
+
+        let etaString;
+
+        if (difference <= 0) {
+            etaString = "Due";
+        } else {
+            etaString = `${difference} min`;
         } //end if
 
-        let padLength = 2;
+        let eta = $("<td>").text(etaString);
 
-        let padValue = "0";
-
-        minute = String(minute).padStart(padLength, padValue);
-
-        let dateString = `${hour}:${minute} ${ampm}`
-
-        let arrivalTime = $("<td>").text(dateString);
-
-        let tableRow = $("<tr>").append(route, destination, run, arrivalTime);
+        let tableRow = $("<tr>").append(route, destination, run, eta);
 
         if (train.due) {
             tableRow.addClass("table-success");
