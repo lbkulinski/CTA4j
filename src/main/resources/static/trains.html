@@ -122,6 +122,8 @@
 
         difference /= minuteMillis;
 
+        difference = Math.round(difference);
+
         let etaString;
 
         if (difference <= 0) {
