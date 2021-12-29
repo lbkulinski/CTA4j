@@ -192,7 +192,9 @@
         let div_trains = $("#div_trains");
 
         if (!urlParameters.has("map_id")) {
-            div_trains.text("Error: A map ID is required");
+            div_trains.addClass("alert alert-danger")
+                      .attr("role", "alert")
+                      .text("Error: A map ID is required");
 
             return;
         } //end if
@@ -219,7 +221,9 @@
                 showTable(trains, div_trains);
             },
             "error": function () {
-                div_trains.text("Error: The train data could not be retrieved");
+                div_trains.addClass("alert alert-danger")
+                          .attr("role", "alert")
+                          .text("Error: The train data could not be retrieved");
             }
         });
     } //updateTrains
