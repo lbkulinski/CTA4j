@@ -89,17 +89,23 @@
     } //compareTrains
 
     function getTableHead() {
-        let route = $("<th>").text("Route");
+        let route = $("<th>").attr("scope", "col")
+                             .text("Route");
 
-        let destination = $("<th>").text("Destination");
+        let destination = $("<th>").attr("scope", "col")
+                                   .text("Destination");
 
-        let run = $("<th>").text("Run");
+        let run = $("<th>").attr("scope", "col")
+                           .text("Run");
 
-        let arrivalTime = $("<th>").text("Arrival Time");
+        let arrivalTime = $("<th>").attr("scope", "col")
+                                   .text("Arrival Time");
 
-        let due = $("<th>").text("Due");
+        let due = $("<th>").attr("scope", "col")
+                           .text("Due");
 
-        let delayed = $("<th>").text("Delayed");
+        let delayed = $("<th>").attr("scope", "col")
+                               .text("Delayed");
 
         return $("<thead>").append(route, destination, run, arrivalTime, due, delayed);
     } //getTableHead
@@ -184,7 +190,7 @@
             tableBody.append(tableRow);
         });
 
-        let table = $("<table>");
+        let table = $("<table>").addClass("table table-dark");
 
         if (station) {
             let titleText = `CTA4j Train Tracker -- ${station}`;
