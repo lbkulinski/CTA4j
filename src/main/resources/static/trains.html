@@ -79,13 +79,7 @@
         let arrivalTime = $("<th>").attr("scope", "col")
                                    .text("Arrival Time");
 
-        let due = $("<th>").attr("scope", "col")
-                           .text("Due");
-
-        let delayed = $("<th>").attr("scope", "col")
-                               .text("Delayed");
-
-        return $("<thead>").append(route, destination, run, arrivalTime, due, delayed);
+        return $("<thead>").append(route, destination, run, arrivalTime);
     } //getTableHead
 
     function getTableRow(train) {
@@ -138,19 +132,15 @@
 
         let arrivalTime = $("<td>").text(dateString);
 
-        let checkMark = "&#10003;";
+        let tableRow = $("<tr>").append(route, destination, run, arrivalTime);
 
-        let dueHtml = train.due ? checkMark : "";
+        if (train.due) {
+            tableRow.addClass("table-success");
+        } else if (train.delayed) {
+            tableRow.addClass("table-danger");
+        } //end if
 
-        let due = $("<td>").css("text-align", "center")
-                           .html(dueHtml);
-
-        let delayedHtml = train.delayed ? checkMark : "";
-
-        let delayed = $("<td>").css("text-align", "center")
-                               .html(delayedHtml);
-
-        return $("<tr>").append(route, destination, run, arrivalTime, due, delayed);
+        return tableRow;
     } //getTableRow
 
     function showTable(trains, div_trains) {
