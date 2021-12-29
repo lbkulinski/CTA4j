@@ -83,7 +83,8 @@
     } //getTableHead
 
     function getTableRow(train) {
-        let properties = ["route", "destination", "run", "arrival_time", "due", "delayed"];
+        let properties = ["route", "destination", "run", "prediction_time", "arrival_time", "due", "scheduled",
+                          "fault", "delayed"];
 
         let error = false;
 
@@ -112,11 +113,11 @@
 
         let arrivalMillis = arrivalDate.getTime();
 
-        let now = new Date();
+        let predictionDate = new Date(train.prediction_time);
 
-        let nowMillis = now.getTime();
+        let predictionMillis = predictionDate.getTime();
 
-        let difference = arrivalMillis - nowMillis;
+        let difference = arrivalMillis - predictionMillis;
 
         let minuteMillis = 60000;
 
@@ -126,7 +127,7 @@
 
         let etaString;
 
-        if (train.due || (difference <= 0)) {
+        if (difference <= 1) {
             etaString = "Due";
         } else {
             etaString = `${difference} min`;
@@ -140,6 +141,10 @@
             tableRow.addClass("table-success");
         } else if (train.delayed) {
             tableRow.addClass("table-danger");
+        } else if (train.fault) {
+            tableRow.addClass("table-warning");
+        } else if (train.scheduled) {
+            tableRow.addClass("table-info");
         } //end if
 
         return tableRow;

@@ -26,15 +26,15 @@ package com.cta4j.model.adapters;
 
 import com.google.gson.TypeAdapter;
 import com.cta4j.model.Train;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Objects;
-import com.cta4j.model.Route;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import com.google.gson.stream.JsonReader;
-import java.util.Map;
-import java.util.HashMap;
+import com.cta4j.model.Route;
 import com.google.gson.stream.JsonToken;
 import java.time.format.DateTimeParseException;
 
@@ -42,9 +42,18 @@ import java.time.format.DateTimeParseException;
  * A type adapter for the {@link Train} class.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 28, 2021
+ * @version December 29, 2021
  */
 public final class TrainTypeAdapter extends TypeAdapter<Train> {
+    /**
+     * The {@link Logger} of this type adapter.
+     */
+    private static final Logger LOGGER;
+
+    static {
+        LOGGER = LogManager.getLogger();
+    } //static
+
     /**
      * Constructs an instance of the {@link TrainTypeAdapter} class.
      */
@@ -68,7 +77,7 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
 
         jsonWriter.name("run");
 
-        int run = train.run();
+        Integer run = train.run();
 
         jsonWriter.value(run);
 
@@ -115,43 +124,43 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
 
         jsonWriter.name("due");
 
-        boolean due = train.due();
+        Boolean due = train.due();
 
         jsonWriter.value(due);
 
         jsonWriter.name("scheduled");
 
-        boolean scheduled = train.scheduled();
+        Boolean scheduled = train.scheduled();
 
         jsonWriter.value(scheduled);
 
         jsonWriter.name("fault");
 
-        boolean fault = train.fault();
+        Boolean fault = train.fault();
 
         jsonWriter.value(fault);
 
         jsonWriter.name("delayed");
 
-        boolean delayed = train.delayed();
+        Boolean delayed = train.delayed();
 
         jsonWriter.value(delayed);
 
         jsonWriter.name("latitude");
 
-        double latitude = train.latitude();
+        Double latitude = train.latitude();
 
         jsonWriter.value(latitude);
 
         jsonWriter.name("longitude");
 
-        double longitude = train.longitude();
+        Double longitude = train.longitude();
 
         jsonWriter.value(longitude);
 
         jsonWriter.name("heading");
 
-        int heading = train.heading();
+        Integer heading = train.heading();
 
         jsonWriter.value(heading);
 
@@ -169,7 +178,33 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
     public static Train readTrain(JsonReader jsonReader) throws IOException {
         Objects.requireNonNull(jsonReader, "the specified JsonReader is null");
 
-        Map<String, Object> keyToValue = new HashMap<>();
+        Integer run = null;
+
+        Route route = null;
+
+        String destination = null;
+
+        String station = null;
+
+        String description = null;
+
+        LocalDateTime predictionTime = null;
+
+        LocalDateTime arrivalTime = null;
+
+        Boolean due = null;
+
+        Boolean scheduled = null;
+
+        Boolean fault = null;
+
+        Boolean delayed = null;
+
+        Double latitude = null;
+
+        Double longitude = null;
+
+        Integer heading = null;
 
         jsonReader.beginObject();
 
@@ -186,22 +221,20 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
                 case "rn" -> {
                     String runString = jsonReader.nextString();
 
-                    int run;
-
                     try {
                         run = Integer.parseInt(runString);
                     } catch (NumberFormatException e) {
-                        throw new IOException("the response includes a malformed run");
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed run");
                     } //end try catch
-
-                    keyToValue.put("run", run);
                 } //case "rn"
                 case "rt" -> {
                     String routeString = jsonReader.nextString();
 
                     routeString = routeString.toLowerCase();
 
-                    Route route = switch (routeString) {
+                    route = switch (routeString) {
                         case "red" -> Route.RED;
                         case "blue" -> Route.BLUE;
                         case "brn" -> Route.BROWN;
@@ -213,217 +246,104 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
                         default -> {
                             String errorMessage = "the response includes a novel route: %s".formatted(routeString);
 
-                            throw new IOException(errorMessage);
+                            LOGGER.atError()
+                                  .log(errorMessage);
+
+                            yield null;
                         } //default
                     };
-
-                    keyToValue.put("route", route);
                 } //case "rt"
-                case "destNm" -> {
-                    String destination = jsonReader.nextString();
-
-                    keyToValue.put("destination", destination);
-                } //case "destNm"
-                case "staNm" -> {
-                    String station = jsonReader.nextString();
-
-                    keyToValue.put("station", station);
-                } //case "staNm"
-                case "stpDe" -> {
-                    String description = jsonReader.nextString();
-
-                    keyToValue.put("description", description);
-                } //case "stpDe"
+                case "destNm" -> destination = jsonReader.nextString();
+                case "staNm" -> station = jsonReader.nextString();
+                case "stpDe" -> description = jsonReader.nextString();
                 case "prdt" -> {
                     String predictionTimeString = jsonReader.nextString();
-
-                    LocalDateTime predictionTime;
 
                     try {
                         predictionTime = LocalDateTime.parse(predictionTimeString);
                     } catch (DateTimeParseException e) {
-                        throw new IOException("the response includes a malformed prediction time");
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed prediction time");
                     } //end try catch
-
-                    keyToValue.put("predictionTime", predictionTime);
                 } //case "prdt"
                 case "arrT" -> {
                     String arrivalTimeString = jsonReader.nextString();
 
-                    LocalDateTime arrivalTime;
-
                     try {
                         arrivalTime = LocalDateTime.parse(arrivalTimeString);
                     } catch (DateTimeParseException e) {
-                        throw new IOException("the response includes a malformed arrival time");
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed arrival time");
                     } //end try catch
-
-                    keyToValue.put("arrivalTime", arrivalTime);
                 } //case "arrT"
                 case "isApp" -> {
                     String dueString = jsonReader.nextString();
 
                     String dueTrue = "1";
 
-                    boolean due = Objects.equals(dueString, dueTrue);
-
-                    keyToValue.put("due", due);
+                    due = Objects.equals(dueString, dueTrue);
                 } //case "isApp"
                 case "isSch" -> {
                     String scheduledString = jsonReader.nextString();
 
                     String scheduledTrue = "1";
 
-                    boolean scheduled = Objects.equals(scheduledString, scheduledTrue);
-
-                    keyToValue.put("scheduled", scheduled);
+                    scheduled = Objects.equals(scheduledString, scheduledTrue);
                 } //case "isSch"
                 case "isFlt" -> {
                     String faultString = jsonReader.nextString();
 
                     String faultTrue = "1";
 
-                    boolean fault = Objects.equals(faultString, faultTrue);
-
-                    keyToValue.put("fault", fault);
+                    fault = Objects.equals(faultString, faultTrue);
                 } //case "isFlt"
                 case "isDly" -> {
                     String delayedString = jsonReader.nextString();
 
                     String delayedTrue = "1";
 
-                    boolean delayed = Objects.equals(delayedString, delayedTrue);
-
-                    keyToValue.put("delayed", delayed);
+                    delayed = Objects.equals(delayedString, delayedTrue);
                 } //case "isDly"
                 case "lat" -> {
                     String latitudeString = jsonReader.nextString();
 
-                    double latitude;
-
                     try {
                         latitude = Double.parseDouble(latitudeString);
                     } catch (NumberFormatException e) {
-                        throw new IOException("the response includes a malformed latitude");
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed latitude");
                     } //end try catch
-
-                    keyToValue.put("latitude", latitude);
                 } //case "lat"
                 case "lon" -> {
                     String longitudeString = jsonReader.nextString();
 
-                    double longitude;
-
                     try {
                         longitude = Double.parseDouble(longitudeString);
                     } catch (NumberFormatException e) {
-                        throw new IOException("the response includes a malformed longitude");
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed longitude");
                     } //end try catch
-
-                    keyToValue.put("longitude", longitude);
                 } //case "lon"
                 case "heading" -> {
                     String headingString = jsonReader.nextString();
 
-                    int heading;
-
                     try {
                         heading = Integer.parseInt(headingString);
                     } catch (NumberFormatException e) {
-                        throw new IOException("the response includes a malformed heading");
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed heading");
                     } //end try catch
-
-                    keyToValue.put("heading", heading);
                 } //case "heading"
                 default -> jsonReader.nextString();
             } //end switch
         } //end while
 
         jsonReader.endObject();
-
-        Integer run = (Integer) keyToValue.get("run");
-
-        if (run == null) {
-            throw new IOException("the member \"rn\" was not included in the response");
-        } //end if
-
-        Route route = (Route) keyToValue.get("route");
-
-        if (route == null) {
-            throw new IOException("the member \"rt\" was not included in the response");
-        } //end if
-
-        String destination = (String) keyToValue.get("destination");
-
-        if (destination == null) {
-            throw new IOException("the member \"destNm\" was not included in the response");
-        } //end if
-
-        String station = (String) keyToValue.get("station");
-
-        if (station == null) {
-            throw new IOException("the member \"staNm\" was not included in the response");
-        } //end if
-
-        String description = (String) keyToValue.get("description");
-
-        if (description == null) {
-            throw new IOException("the member \"stpDe\" was not included in the response");
-        } //end if
-
-        LocalDateTime predictionTime = (LocalDateTime) keyToValue.get("predictionTime");
-
-        if (predictionTime == null) {
-            throw new IOException("the member \"prdt\" was not included in the response");
-        } //end if
-
-        LocalDateTime arrivalTime = (LocalDateTime) keyToValue.get("arrivalTime");
-
-        if (arrivalTime == null) {
-            throw new IOException("the member \"arrT\" was not included in the response");
-        } //end if
-
-        Boolean due = (Boolean) keyToValue.get("due");
-
-        if (due == null) {
-            throw new IOException("the member \"isApp\" was not included in the response");
-        } //end if
-
-        Boolean scheduled = (Boolean) keyToValue.get("scheduled");
-
-        if (scheduled == null) {
-            throw new IOException("the member \"isSch\" was not included in the response");
-        } //end if
-
-        Boolean fault = (Boolean) keyToValue.get("fault");
-
-        if (fault == null) {
-            throw new IOException("the member \"isFlt\" was not included in the response");
-        } //end if
-
-        Boolean delayed = (Boolean) keyToValue.get("delayed");
-
-        if (delayed == null) {
-            throw new IOException("the member \"isDly\" was not included in the response");
-        } //end if
-
-        Double latitude = (Double) keyToValue.get("latitude");
-
-        if (latitude == null) {
-            throw new IOException("the member \"lat\" was not included in the response");
-        } //end if
-
-        Double longitude = (Double) keyToValue.get("longitude");
-
-        if (longitude == null) {
-            throw new IOException("the member \"lon\" was not included in the response");
-        } //end if
-
-        Integer heading = (Integer) keyToValue.get("heading");
-
-        if (heading == null) {
-            throw new IOException("the member \"heading\" was not included in the response");
-        } //end if
 
         return new Train(run, route, destination, station, description, predictionTime, arrivalTime, due, scheduled,
                          fault, delayed, latitude, longitude, heading);
