@@ -126,7 +126,7 @@
 
         let etaString;
 
-        if (difference <= 0) {
+        if (train.due || (difference <= 0)) {
             etaString = "Due";
         } else {
             etaString = `${difference} min`;
