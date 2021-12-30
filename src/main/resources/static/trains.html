@@ -8,6 +8,32 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css"
           integrity="sha256-FdatTf20PQr/rWg+cAKfl6j4/IY3oohFAJ7gVC3M34E=" crossorigin="anonymous">
     <style>
+        html, head, body, .select2-container--default .select2-selection--single, .select2-search,
+        .select2-search input, .select2-results {
+            background-color: #111517;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered,
+        .select2-search input, .select2-results__option {
+            color: #fff;
+        }
+
+        .select2-results__option[aria-selected=true] {
+            background-color: dimgray;
+        }
+
+        .select2-results__option--highlighted[aria-selected] {
+            background-color: steelblue;
+        }
+
+        .select2-container *:focus {
+            outline: none;
+        }
+
+        .card {
+            background-color: black;
+        }
+
         caption {
             caption-side: top;
             text-align: left;
@@ -33,7 +59,7 @@
     <div class="card">
         <div class="card-body">
             <div id="div_trains">
-                <table id="table_trains" class="table mt-0 mb-0">
+                <table id="table_trains" class="table table-sm table-dark mt-0 mb-0">
                     <thead>
                     <tr>
                         <th scope="col">
