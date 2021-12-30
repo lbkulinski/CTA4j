@@ -143,6 +143,11 @@
 
         if (train.due) {
             tableRow.addClass("table-success");
+
+            tableRow.popover({
+                "trigger": "hover",
+                "content": "This train is due."
+            });
         } else if (train.delayed) {
             tableRow.addClass("table-danger");
         } else if (train.fault) {
