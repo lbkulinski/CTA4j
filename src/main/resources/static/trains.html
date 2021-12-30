@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css"
+          integrity="sha256-FdatTf20PQr/rWg+cAKfl6j4/IY3oohFAJ7gVC3M34E=" crossorigin="anonymous">
     <style>
-        html, head, body {
-            background-color: #111517;
-        }
-
         caption {
             caption-side: top;
             text-align: left;
@@ -20,15 +18,124 @@
     <title id="title">CTA4j Train Tracker</title>
 </head>
 <body>
-<div id="div_trains">
+<input type="hidden" id="input_map_id">
+<div class="container mt-3">
+    <div class="card mb-3" style="max-width: 30rem;">
+        <div class="card-body">
+            <div id="div_stations">
+                <select id="select_stations" style="width: 100%;"></select>
+            </div>
+            <div id="div_stations_error" class="alert alert-danger mt-0 mb-0" role="alert" style="display: none;">
+                Error: The station data could not be retrieved.
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div id="div_trains">
+                <table id="table_trains" class="table mt-0 mb-0">
+                    <thead>
+                    <tr>
+                        <th scope="col">
+                            Route
+                        </th>
+                        <th scope="col">
+                            Destination
+                        </th>
+                        <th scope="col">
+                            Run
+                        </th>
+                        <th scope="col">
+                            ETA
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody_trains">
+                    </tbody>
+                </table>
+            </div>
+            <div id="div_trains_error" class="alert alert-danger mt-0 mb-0" role="alert" style="display: none;">
+                Error: The train data could not be retrieved.
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"
+        integrity="sha256-AFAYEOkzB6iIKnTYZOdUf9FFje6lOTYdwRJKwTN5mks=" crossorigin="anonymous"></script>
 <script>
     let station = null;
+
+    function handleStations(stations) {
+        let mapIds = new Set();
+
+        let options = [];
+
+        stations.forEach(function (station) {
+            if (!station.hasOwnProperty("map_id") || !station.hasOwnProperty("station_descriptive_name")) {
+                return;
+            } //end if
+
+            let mapId = station.map_id;
+
+            let stationName = station.station_descriptive_name;
+
+            if (mapIds.has(mapId)) {
+                return;
+            } //end if
+
+            mapIds.add(mapId);
+
+            let option = $("<option>").attr("value", mapId)
+                                      .text(stationName);
+
+            options.push(option);
+        });
+
+        let select_stations = $("#select_stations");
+
+        select_stations.append(options);
+
+        select_stations.select2({
+            "placeholder": "Select a station"
+        });
+
+        let map_id = $("#input_map_id").val();
+
+        select_stations.val(map_id)
+                       .trigger("change");
+
+        select_stations.change(function () {
+            let mapId = $(this).val();
+
+            if (!mapId) {
+                return;
+            } //end if
+
+            $("#input_map_id").val(mapId);
+
+            updateTrains();
+        });
+    } //handleStations
+
+    function showStationSelect() {
+        $.ajax({
+            "type": "GET",
+            "url": "https://data.cityofchicago.org/resource/8pix-ypme.json",
+            "success": function (stations) {
+                handleStations(stations);
+            },
+            "error": function () {
+                $("#div_stations").addClass("alert alert-danger")
+                                  .attr("role", "alert")
+                                  .text("Error: The station data could not be retrieved");
+            }
+        });
+    } //showStationSelect
 
     function compareTrains(train0, train1) {
         if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("destination") ||
@@ -69,22 +176,6 @@
             return 1;
         } //end if
     } //compareTrains
-
-    function getTableHead() {
-        let route = $("<th>").attr("scope", "col")
-                             .text("Route");
-
-        let destination = $("<th>").attr("scope", "col")
-                                   .text("Destination");
-
-        let run = $("<th>").attr("scope", "col")
-                           .text("Run");
-
-        let eta = $("<th>").attr("scope", "col")
-                           .text("ETA");
-
-        return $("<thead>").append(route, destination, run, eta);
-    } //getTableHead
 
     function getTableRow(train) {
         let properties = ["route", "destination", "run", "prediction_time", "arrival_time", "due", "scheduled",
@@ -177,9 +268,9 @@
     } //getTableRow
 
     function showTable(trains, div_trains) {
-        let tableHead = getTableHead();
+        let tableBody = $("#tbody_trains");
 
-        let tableBody = $("<tbody>");
+        tableBody.empty();
 
         trains.forEach(function (train) {
             let tableRow = getTableRow(train);
@@ -191,45 +282,23 @@
             tableBody.append(tableRow);
         });
 
-        let table = $("<table>").addClass("table table-dark");
+        $("#div_trains_error").hide();
 
-        if (station) {
-            let titleText = `CTA4j Train Tracker -- ${station}`;
-
-            $("#title").text(titleText);
-
-            let caption = $("<caption>").text(station);
-
-            table.append(caption);
-        } //end if
-
-        table.append(tableHead, tableBody);
-
-        div_trains.removeClass("alert alert-danger");
-
-        div_trains.removeAttr("role");
-
-        div_trains.html(table);
+        div_trains.show();
     } //showTable
 
     function updateTrains() {
-        let urlParameters = new URLSearchParams(window.location.search);
+        let mapId = $("#input_map_id").val();
 
-        let div_trains = $("#div_trains");
-
-        if (!urlParameters.has("map_id")) {
-            div_trains.addClass("alert alert-danger")
-                      .attr("role", "alert")
-                      .text("Error: A map ID is required");
-
+        if (!mapId) {
             return;
         } //end if
-
-        let mapId = urlParameters.get("map_id");
 
         let data = {
             "map_id": mapId
         };
+
+        let urlParameters = new URLSearchParams(window.location.search);
 
         if (urlParameters.has("route")) {
             data["route"] = urlParameters.getAll("route");
@@ -237,24 +306,38 @@
 
         $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/get-trains",
+            "url": "http://localhost:8080/get-trains",
             "data": data,
             "success": function (response) {
                 let trains = JSON.parse(response);
 
                 trains.sort(compareTrains);
 
+                let div_trains = $("#div_trains");
+
                 showTable(trains, div_trains);
             },
             "error": function () {
-                div_trains.addClass("alert alert-danger")
-                          .attr("role", "alert")
-                          .text("Error: The train data could not be retrieved");
+                $("#div_trains").hide();
+
+                $("#div_trains_error").show();
             }
         });
     } //updateTrains
 
     $(function () {
+        let urlParameters = new URLSearchParams(window.location.search);
+
+        let mapId = null;
+
+        if (urlParameters.has("map_id")) {
+            mapId = urlParameters.get("map_id");
+
+            $("#input_map_id").val(mapId);
+        } //end if
+
+        showStationSelect();
+
         updateTrains();
 
         let timeout = 30000;
