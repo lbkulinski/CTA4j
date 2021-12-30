@@ -141,39 +141,37 @@
 
         let tableRow = $("<tr>").append(route, destination, run, eta);
 
+        let rowClass;
+
+        let popoverContent;
+
         if (train.due) {
-            tableRow.addClass("table-success");
+            rowClass = "table-success";
 
-            tableRow.popover({
-                "trigger": "hover",
-                "placement": "auto",
-                "content": "This train is due."
-            });
+            popoverContent = "This train is due.";
         } else if (train.delayed) {
-            tableRow.addClass("table-danger");
+            rowClass = "table-danger";
 
-            tableRow.popover({
-                "trigger": "hover",
-                "placement": "auto",
-                "content": "This train is delayed."
-            });
+            popoverContent = "This train is delayed.";
         } else if (train.fault) {
-            tableRow.addClass("table-warning");
+            rowClass = "table-warning";
 
-            tableRow.popover({
-                "trigger": "hover",
-                "placement": "auto",
-                "content": "This train has a fault."
-            });
+            popoverContent = "This train has a fault.";
         } else if (train.scheduled) {
-            tableRow.addClass("table-info");
+            rowClass = "table-info";
 
-            tableRow.popover({
-                "trigger": "hover",
-                "placement": "auto",
-                "content": "This train's ETA is not real-time."
-            });
+            popoverContent = "This train's data is not real-time.";
+        } else {
+            return tableRow;
         } //end if
+
+        tableRow.addClass(rowClass);
+
+        tableRow.popover({
+            "trigger": "hover",
+            "placement": "auto",
+            "content": popoverContent
+        });
 
         return tableRow;
     } //getTableRow
