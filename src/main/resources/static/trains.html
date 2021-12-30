@@ -207,6 +207,10 @@
 
         table.append(tableHead, tableBody);
 
+        div_trains.removeClass("alert alert-danger");
+
+        div_trains.removeAttr("role");
+
         div_trains.html(table);
     } //showTable
 
