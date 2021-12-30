@@ -146,14 +146,33 @@
 
             tableRow.popover({
                 "trigger": "hover",
+                "placement": "auto",
                 "content": "This train is due."
             });
         } else if (train.delayed) {
             tableRow.addClass("table-danger");
+
+            tableRow.popover({
+                "trigger": "hover",
+                "placement": "auto",
+                "content": "This train is delayed."
+            });
         } else if (train.fault) {
             tableRow.addClass("table-warning");
+
+            tableRow.popover({
+                "trigger": "hover",
+                "placement": "auto",
+                "content": "This train has a fault."
+            });
         } else if (train.scheduled) {
             tableRow.addClass("table-info");
+
+            tableRow.popover({
+                "trigger": "hover",
+                "placement": "auto",
+                "content": "This train's ETA is not real-time."
+            });
         } //end if
 
         return tableRow;
