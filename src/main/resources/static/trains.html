@@ -47,11 +47,11 @@
             font-weight: bold;
         }
 
-        .table-success {
+        .train-due {
             background-color: #23372F;
         }
 
-        .table-info {
+        .train-scheduled {
             background-color: #173844;
         }
     </style>
@@ -290,7 +290,7 @@
         let popoverContent;
 
         if (train.due) {
-            rowClass = "table-success";
+            rowClass = "train-due";
 
             popoverContent = "This train is due.";
         } else if (train.delayed) {
@@ -302,7 +302,7 @@
 
             popoverContent = "This train has a fault.";
         } else if (train.scheduled) {
-            rowClass = "table-info";
+            rowClass = "train-scheduled";
 
             popoverContent = "This train's data is not real-time.";
         } else {
