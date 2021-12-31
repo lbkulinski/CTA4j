@@ -229,7 +229,20 @@
             station = train.station;
         } //end if
 
-        let route = $("<td>").css("color", train.route)
+        let routeToHexColor = {
+            "RED": "#C60C30",
+            "BLUE": "#00A1DE",
+            "BROWN": "#62361B",
+            "GREEN": "#009B3A",
+            "ORANGE": "#F9461C",
+            "PURPLE": "#522398",
+            "PINK": "#E27EA6",
+            "YELLOW": "#F9E300"
+        };
+
+        let hexColor = routeToHexColor[train.route];
+
+        let route = $("<td>").css("color", hexColor)
                              .text(train.route);
 
         let destination = $("<td>").text(train.destination);
