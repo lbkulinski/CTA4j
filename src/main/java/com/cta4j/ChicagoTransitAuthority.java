@@ -63,7 +63,7 @@ public final class ChicagoTransitAuthority {
     private static final Logger LOGGER;
 
     static {
-        LOGGER = LogManager.getLogger();
+        LOGGER = LogManager.getLogger(ChicagoTransitAuthority.class);
     } //static
 
     /**

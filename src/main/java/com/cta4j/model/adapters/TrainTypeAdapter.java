@@ -51,7 +51,7 @@ public final class TrainTypeAdapter extends TypeAdapter<Train> {
     private static final Logger LOGGER;
 
     static {
-        LOGGER = LogManager.getLogger();
+        LOGGER = LogManager.getLogger(TrainTypeAdapter.class);
     } //static
 
     /**

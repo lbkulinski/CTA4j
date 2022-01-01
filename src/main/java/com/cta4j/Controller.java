@@ -77,5 +77,5 @@ public final class Controller {
         } //end for
 
         return gson.toJson(response);
-    } //getRoutes
+    } //getTrains
 }
