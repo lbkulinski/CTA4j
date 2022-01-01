@@ -178,11 +178,17 @@
 
         let id = $("<td>").text(bus.id);
 
-        let etaMinutes = bus.eta_minutes;
+        let etaMinutes;
+
+        if (bus.hasOwnProperty("eta_minutes")) {
+            etaMinutes = bus.eta_minutes;
+        } else {
+            etaMinutes = null;
+        } //end if
 
         let etaString;
 
-        if (!etaMinutes) {
+        if (etaMinutes === null) {
             etaString = "Delayed";
         } else if (etaMinutes <= 1) {
             etaString = "Due";
@@ -198,14 +204,14 @@
 
         let popoverContent;
 
-        if (etaMinutes <= 1) {
-            rowClass = "table-success";
-
-            popoverContent = "This bus is due.";
-        } else if (bus.delayed) {
+        if (bus.delayed) {
             rowClass = "table-danger";
 
             popoverContent = "This bus is delayed.";
+        } else if ((etaMinutes !== null) && (etaMinutes <= 1)) {
+            rowClass = "table-success";
+
+            popoverContent = "This bus is due.";
         } else {
             return tableRow;
         } //end if
