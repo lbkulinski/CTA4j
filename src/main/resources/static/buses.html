@@ -295,6 +295,14 @@
         $("#input_stop_id").on("input", function () {
             let stopId = $(this).val();
 
+            stopId = stopId.trim();
+
+            if (stopId === "") {
+                $("#button_search").prop("disabled", true);
+
+                return;
+            } //end if
+
             let regex = /^\d+$/;
 
             if (stopId.match(regex)) {
