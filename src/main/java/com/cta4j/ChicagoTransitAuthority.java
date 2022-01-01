@@ -26,8 +26,8 @@ package com.cta4j;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import com.cta4j.model.Train;
-import com.cta4j.model.Route;
+import com.cta4j.model.train.Train;
+import com.cta4j.model.train.Route;
 import java.util.Set;
 import java.util.Objects;
 import java.util.Arrays;
@@ -54,7 +54,7 @@ import java.util.HashSet;
  * A set of utility methods used to interact with the CTA's API.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 28, 2021
+ * @version December 31, 2021
  */
 public final class ChicagoTransitAuthority {
     /**

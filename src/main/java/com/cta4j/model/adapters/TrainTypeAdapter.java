@@ -25,7 +25,7 @@
 package com.cta4j.model.adapters;
 
 import com.google.gson.TypeAdapter;
-import com.cta4j.model.Train;
+import com.cta4j.model.train.Train;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import com.google.gson.stream.JsonWriter;
@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import com.google.gson.stream.JsonReader;
-import com.cta4j.model.Route;
+import com.cta4j.model.train.Route;
 import com.google.gson.stream.JsonToken;
 import java.time.format.DateTimeParseException;
 
@@ -42,7 +42,7 @@ import java.time.format.DateTimeParseException;
  * A type adapter for the {@link Train} class.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 29, 2021
+ * @version December 31, 2021
  */
 public final class TrainTypeAdapter extends TypeAdapter<Train> {
     /**

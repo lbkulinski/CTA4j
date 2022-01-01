@@ -22,52 +22,22 @@
  * SOFTWARE.
  */
 
-package com.cta4j.model;
+package com.cta4j.model.bus;
 
 /**
- * A route of the Chicago Transit Authority.
+ * A bus type of the Chicago Transit Authority.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 27, 2021
+ * @version December 31, 2021
  */
-public enum Route {
+public enum Type {
     /**
-     * The singleton instance representing the red {@link Route}.
+     * The singleton instance representing the arrival {@link Type}.
      */
-    RED,
+    ARRIVAL,
 
     /**
-     * The singleton instance representing the blue {@link Route}.
+     * The singleton instance representing the departure {@link Type}.
      */
-    BLUE,
-
-    /**
-     * The singleton instance representing the brown {@link Route}.
-     */
-    BROWN,
-
-    /**
-     * The singleton instance representing the green {@link Route}.
-     */
-    GREEN,
-
-    /**
-     * The singleton instance representing the orange {@link Route}.
-     */
-    ORANGE,
-
-    /**
-     * The singleton instance representing the purple {@link Route}.
-     */
-    PURPLE,
-
-    /**
-     * The singleton instance representing the pink {@link Route}.
-     */
-    PINK,
-
-    /**
-     * The singleton instance representing the yellow {@link Route}.
-     */
-    YELLOW
+    DEPARTURE
 }

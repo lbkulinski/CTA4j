@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.cta4j.model;
+package com.cta4j.model.train;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
  * A train run by the Chicago Transit Authority.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 29, 2021
+ * @version December 31, 2021
  * @param run the run of this train
  * @param route the route of this train
  * @param destination the destination of this train

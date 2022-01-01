@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Set;
-import com.cta4j.model.Train;
+import com.cta4j.model.train.Train;
 import com.google.gson.GsonBuilder;
 import com.cta4j.model.adapters.TrainTypeAdapter;
 import com.google.gson.Gson;
@@ -39,7 +39,7 @@ import com.google.gson.JsonElement;
  * A controller of the CTA4j application.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 28, 2021
+ * @version December 31, 2021
  */
 @RestController
 public final class Controller {
