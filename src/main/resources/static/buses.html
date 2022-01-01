@@ -47,6 +47,13 @@
         .popover .popover-arrow::before, .popover .popover-arrow::after {
             display: none;
         }
+
+        caption {
+            caption-side: top;
+            text-align: left;
+            padding-bottom: 5px;
+            font-weight: bold;
+        }
     </style>
     <title id="title">CTA4j Bus Tracker</title>
 </head>
@@ -78,6 +85,8 @@
         <div class="card-body">
             <div id="div_buses">
                 <table id="table_buses" class="table table-sm table-dark mt-0 mb-0">
+                    <caption id="caption_stop_name">
+                    </caption>
                     <thead>
                     <tr>
                         <th scope="col">
@@ -85,9 +94,6 @@
                         </th>
                         <th scope="col">
                             Destination
-                        </th>
-                        <th scope="col">
-                            Stop
                         </th>
                         <th scope="col">
                             ID
@@ -170,11 +176,11 @@
             return null;
         } //end if
 
+        $("#caption_stop_name").text(bus.stop);
+
         let route = $("<td>").text(bus.route);
 
         let destination = $("<td>").text(bus.destination);
-
-        let stop = $("<td>").text(bus.stop);
 
         let id = $("<td>").text(bus.id);
 
