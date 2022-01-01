@@ -40,8 +40,13 @@
             border: 0;
         }
 
-        .input-group-text, .form-control, .form-control:focus, .popover-body {
+        .card-header, .input-group-text, .form-control, .form-control:focus, .popover-body {
             color: white;
+        }
+
+        .card-header {
+            border-bottom-width: 1px;
+            border-bottom-color: gray;
         }
 
         .popover .popover-arrow::before, .popover .popover-arrow::after {
@@ -59,7 +64,7 @@
                 <div class="col-9">
                     <div class="input-group">
                         <div class="input-group-text">Stop ID</div>
-                        <input type="text" class="form-control" id="input_stop_id"
+                        <input type="text" class="form-control shadow-none" id="input_stop_id"
                                aria-describedby="The input for specifying a stop ID">
                         <div class="invalid-tooltip">
                             Please enter a valid stop ID.
@@ -80,8 +85,6 @@
         <div class="card-body">
             <div id="div_buses">
                 <table id="table_buses" class="table table-sm table-dark mt-0 mb-0">
-                    <caption id="caption_stop_name">
-                    </caption>
                     <thead>
                     <tr>
                         <th scope="col">
@@ -249,6 +252,8 @@
     } //showTable
 
     function updateBuses() {
+        $("#div_stop_name").text("");
+
         let stopId = $("#hidden_input_stop_id").val();
 
         if (!stopId) {
@@ -289,8 +294,6 @@
     $(function () {
         $("#input_stop_id").on("input", function () {
             let stopId = $(this).val();
-
-            console.log(stopId);
 
             let regex = /^\d+$/;
 

@@ -106,8 +106,6 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"
         integrity="sha256-AFAYEOkzB6iIKnTYZOdUf9FFje6lOTYdwRJKwTN5mks=" crossorigin="anonymous"></script>
 <script>
-    let station = null;
-
     function handleStations(stations) {
         let mapIds = new Set();
 
@@ -158,6 +156,10 @@
 
             updateTrains();
         });
+
+        $("#div_stations_error").hide();
+
+        $("#div_stations").show();
     } //handleStations
 
     function showStationSelect() {
@@ -168,9 +170,9 @@
                 handleStations(stations);
             },
             "error": function () {
-                $("#div_stations").addClass("alert alert-danger")
-                                  .attr("role", "alert")
-                                  .text("Error: The station data could not be retrieved");
+                $("#div_stations").hide();
+
+                $("#div_stations_error").show();
             }
         });
     } //showStationSelect
@@ -229,10 +231,6 @@
 
         if (error) {
             return null;
-        } //end if
-
-        if (train.hasOwnProperty("station")) {
-            station = train.station;
         } //end if
 
         let routeToHexColor = {
