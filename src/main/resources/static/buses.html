@@ -298,6 +298,8 @@
             stopId = stopId.trim();
 
             if (stopId === "") {
+                $(".invalid-tooltip").hide();
+
                 $("#button_search").prop("disabled", true);
 
                 return;
