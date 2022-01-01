@@ -39,7 +39,7 @@ import com.google.gson.stream.JsonToken;
  * A type adapter for the {@link Bus} class.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 31, 2021
+ * @version January 1, 2022
  */
 public final class BusTypeAdapter extends TypeAdapter<Bus> {
     /**
@@ -196,10 +196,14 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
                 case "prdctdn" -> {
                     String etaMinutesString = jsonReader.nextString();
 
-                    String due = "DUE";
+                    String dueString = "DUE";
 
-                    if (etaMinutesString.equalsIgnoreCase(due)) {
+                    String delayedString = "DLY";
+
+                    if (etaMinutesString.equalsIgnoreCase(dueString)) {
                         etaMinutesString = "0";
+                    } else if (etaMinutesString.equalsIgnoreCase(delayedString)) {
+                        continue;
                     } //end if
 
                     try {
