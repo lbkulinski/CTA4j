@@ -49,12 +49,14 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonArray;
 import java.util.HashSet;
+import com.cta4j.model.bus.Bus;
+import com.cta4j.model.adapters.BusTypeAdapter;
 
 /**
  * A set of utility methods used to interact with the CTA's API.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 31, 2021
+ * @version January 1, 2022
  */
 public final class ChicagoTransitAuthority {
     /**
@@ -90,7 +92,7 @@ public final class ChicagoTransitAuthority {
 
         Arrays.stream(routeNames)
               .forEach(routeName -> Objects.requireNonNull(routeName,
-                                                           "a route name is the specified array is null"));
+                                                           "a route name in the specified array is null"));
 
         Properties properties = new Properties();
 
@@ -110,11 +112,11 @@ public final class ChicagoTransitAuthority {
                   .log("Error in reading the API key file");
         } //end try catch
 
-        String apiKey = properties.getProperty("key");
+        String apiKey = properties.getProperty("train_key");
 
         if (apiKey == null) {
             LOGGER.atError()
-                  .log("\"key\" could not be found in \"api-key.properties\"");
+                  .log("\"train_key\" could not be found in \"api-key.properties\"");
 
             return Set.of();
         } //end if
@@ -267,4 +269,198 @@ public final class ChicagoTransitAuthority {
 
         return trains;
     } //getTrains
+
+    /**
+     * Returns the {@link Bus}es using the specified stop ID and routes of the Chicago Transit Authority. If no routes
+     * are provided, all routes are returned.
+     *
+     * @param stopId the stop ID to be used in the operation
+     * @param routes the routes to be used in the operation
+     * @return the {@link Bus}es using the specified stop ID and routes of the Chicago Transit Authority
+     * @throws NullPointerException if the specified array of routes or a route in the specified array is {@code null}
+     */
+    public static Set<Bus> getBuses(int stopId, String... routes) {
+        Objects.requireNonNull(routes, "the specified array of routes is null");
+
+        Arrays.stream(routes)
+              .forEach(routeName -> Objects.requireNonNull(routeName,
+                                                           "a route in the specified array is null"));
+
+        Properties properties = new Properties();
+
+        String fileName = "src/main/resources/api-key.properties";
+
+        Path path = Path.of(fileName);
+
+        BufferedReader bufferedReader;
+
+        try {
+            bufferedReader = Files.newBufferedReader(path);
+
+            properties.load(bufferedReader);
+        } catch (IOException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in reading the API key file");
+        } //end try catch
+
+        String apiKey = properties.getProperty("bus_key");
+
+        if (apiKey == null) {
+            LOGGER.atError()
+                  .log("\"bus_key\" could not be found in \"api-key.properties\"");
+
+            return Set.of();
+        } //end if
+
+        String uriString;
+
+        if (routes.length == 0) {
+            uriString = """
+                        http://www.ctabustracker.com/bustime/api/v2/getpredictions\
+                        ?key=%s&stpid=%s&format=json""".formatted(apiKey, stopId);
+        } else {
+            String routesString = Arrays.stream(routes)
+                                        .map(String::toLowerCase)
+                                        .map("rt=%s"::formatted)
+                                        .reduce("%s&%s"::formatted)
+                                        .get();
+
+            uriString = """
+                        http://www.ctabustracker.com/bustime/api/v2/getpredictions\
+                        ?key=%s&stpid=%s&%s&format=json""".formatted(apiKey, stopId, routesString);
+        } //end if
+
+        URI uri;
+
+        try {
+            uri = URI.create(uriString);
+        } catch (IllegalArgumentException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the API URI");
+
+            return Set.of();
+        }//end try catch
+
+        HttpRequest request;
+
+        try {
+            request = HttpRequest.newBuilder(uri)
+                                 .GET()
+                                 .build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the API request");
+
+            return Set.of();
+        } //end try catch
+
+        HttpClient httpClient;
+
+        try {
+            httpClient = HttpClient.newHttpClient();
+        } catch (UncheckedIOException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the HTTP client");
+
+            return Set.of();
+        } //end try catch
+
+        HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString();
+
+        HttpResponse<String> response;
+
+        try {
+            response = httpClient.send(request, bodyHandler);
+        } catch (IOException | InterruptedException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in sending the API request");
+
+            return Set.of();
+        } //end try catch
+
+        String json = response.body();
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+
+        BusTypeAdapter typeAdapter = new BusTypeAdapter();
+
+        gsonBuilder.registerTypeAdapter(Bus.class, typeAdapter);
+
+        Gson gson = gsonBuilder.create();
+
+        JsonObject jsonObject;
+
+        try {
+            jsonObject = gson.fromJson(json, JsonObject.class);
+        } catch (JsonSyntaxException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in parsing the response from the API");
+
+            return Set.of();
+        } //end try catch
+
+        if (!jsonObject.has("bustime-response")) {
+            LOGGER.atError()
+                  .log("Error in parsing the response from the API. The member \"bustime-response\" is missing");
+
+            return Set.of();
+        } //end if
+
+        JsonElement bustimeResponseElement = jsonObject.get("bustime-response");
+
+        if ((bustimeResponseElement == null) || !bustimeResponseElement.isJsonObject()) {
+            LOGGER.atError()
+                  .log("""
+                       Error in parsing the response from the API. The member "bustime-response" is null or not an \
+                       object""");
+
+            return Set.of();
+        } //end if
+
+        JsonObject bustimeResponseObject = bustimeResponseElement.getAsJsonObject();
+
+        if (!bustimeResponseObject.has("prd")) {
+            LOGGER.atError()
+                  .log("Error in parsing the response from the API. The member \"prd\" is missing");
+
+            return Set.of();
+        } //end if
+
+        JsonElement etaElement = bustimeResponseObject.get("prd");
+
+        if ((etaElement == null) || !etaElement.isJsonArray()) {
+            LOGGER.atError()
+                  .log("Error in parsing the response from the API. The member \"prd\" is null or not an array");
+
+            return Set.of();
+        } //end if
+
+        JsonArray prdArray = etaElement.getAsJsonArray();
+
+        Set<Bus> buses = new HashSet<>();
+
+        for (JsonElement jsonElement : prdArray) {
+            Bus bus;
+
+            try {
+                bus = gson.fromJson(jsonElement, Bus.class);
+            } catch (JsonSyntaxException e) {
+                LOGGER.atError()
+                      .withThrowable(e)
+                      .log("Error in parsing a train in the response from the API");
+
+                continue;
+            } //end try catch
+
+            buses.add(bus);
+        } //end for
+
+        return buses;
+    } //getBuses
 }

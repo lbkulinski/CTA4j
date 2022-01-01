@@ -34,12 +34,14 @@ import com.cta4j.model.adapters.TrainTypeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.cta4j.model.bus.Bus;
+import com.cta4j.model.adapters.BusTypeAdapter;
 
 /**
  * A controller of the CTA4j application.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 31, 2021
+ * @version January 1, 2022
  */
 @RestController
 public final class Controller {
@@ -65,8 +67,7 @@ public final class Controller {
 
         gsonBuilder.registerTypeAdapter(Train.class, typeAdapter);
 
-        Gson gson = gsonBuilder.setPrettyPrinting()
-                               .create();
+        Gson gson = gsonBuilder.create();
 
         JsonArray response = new JsonArray();
 
@@ -78,4 +79,39 @@ public final class Controller {
 
         return gson.toJson(response);
     } //getTrains
+
+    /**
+     * Returns a JSON response containing information about buses using the specified stop ID and routes.
+     *
+     * @param stopId the stop ID to be used in the operation
+     * @param routes the routes to be used in the operation
+     * @return a JSON response containing information about buses using the specified stop ID and routes
+     */
+    @GetMapping("get-buses")
+    public String getBuses(@RequestParam(value = "stop_id") int stopId,
+                           @RequestParam(value = "route[]", required = false) String[] routes) {
+        if (routes == null) {
+            routes = new String[0];
+        } //end if
+
+        Set<Bus> buses = ChicagoTransitAuthority.getBuses(stopId, routes);
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+
+        BusTypeAdapter typeAdapter = new BusTypeAdapter();
+
+        gsonBuilder.registerTypeAdapter(Bus.class, typeAdapter);
+
+        Gson gson = gsonBuilder.create();
+
+        JsonArray response = new JsonArray();
+
+        for (Bus bus : buses) {
+            JsonElement element = gson.toJsonTree(bus, Bus.class);
+
+            response.add(element);
+        } //end for
+
+        return gson.toJson(response);
+    } //getBuses
 }
