@@ -60,7 +60,7 @@
 <div class="container mt-3">
     <div class="card mb-3" style="max-width: 30rem;">
         <div class="card-body">
-            <form class="row row-cols-sm-auto g-2 align-items-center">
+            <form id="form_stop_id" class="row row-cols-sm-auto g-2 align-items-center">
                 <div class="col-9">
                     <div class="input-group">
                         <div class="input-group-text">Stop ID</div>
@@ -298,6 +298,10 @@
     } //updateBuses
 
     $(function () {
+        $("#form_stop_id").submit( function (e) {
+            e.preventDefault();
+        });
+
         $("#input_stop_id").on("input", function () {
             let stopId = $(this).val();
 
