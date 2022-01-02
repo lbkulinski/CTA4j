@@ -121,12 +121,12 @@
 <script>
     function compareBuses(bus0, bus1) {
         if (!bus0.hasOwnProperty("route") || !bus0.hasOwnProperty("destination") ||
-            !bus0.hasOwnProperty("eta_minutes")) {
+            !bus0.hasOwnProperty("arrival_time")) {
             return 0;
         } //end if
 
         if (!bus1.hasOwnProperty("route") || !bus1.hasOwnProperty("destination") ||
-            !bus1.hasOwnProperty("eta_minutes")) {
+            !bus1.hasOwnProperty("arrival_time")) {
             return 0;
         } //end if
 
@@ -134,13 +134,13 @@
 
         let destination0 = bus0.destination;
 
-        let etaMinutes0 = bus0.eta_minutes;
+        let date0 = new Date(bus0.arrival_time);
 
         let route1 = bus1.route;
 
         let destination1 = bus1.destination;
 
-        let etaMinutes1 = bus1.eta_minutes;
+        let date1 = new Date(bus1.arrival_time);
 
         if (route0 < route1) {
             return -1;
@@ -150,9 +150,9 @@
             return -1;
         } else if (destination0 > destination1) {
             return 1;
-        } else if (etaMinutes0 < etaMinutes1) {
+        } else if (date0 < date1) {
             return -1;
-        } else if (etaMinutes0 === etaMinutes1) {
+        } else if (date0 === date1) {
             return 0;
         } else {
             return 1;
@@ -160,7 +160,7 @@
     } //compareBuses
 
     function getTableRow(bus) {
-        let properties = ["route", "destination", "stop", "id"];
+        let properties = ["route", "destination", "stop", "id", "prediction_time", "arrival_time", "delayed"];
 
         let error = false;
 
@@ -182,22 +182,28 @@
 
         let id = $("<td>").text(bus.id);
 
-        let etaMinutes;
+        let arrivalDate = new Date(bus.arrival_time);
 
-        if (bus.hasOwnProperty("eta_minutes")) {
-            etaMinutes = bus.eta_minutes;
-        } else {
-            etaMinutes = null;
-        } //end if
+        let arrivalMillis = arrivalDate.getTime();
+
+        let predictionDate = new Date(bus.prediction_time);
+
+        let predictionMillis = predictionDate.getTime();
+
+        let difference = arrivalMillis - predictionMillis;
+
+        let minuteMillis = 60000;
+
+        difference /= minuteMillis;
+
+        difference = Math.round(difference);
 
         let etaString;
 
-        if (etaMinutes === null) {
-            etaString = "Delayed";
-        } else if (etaMinutes <= 1) {
+        if (difference <= 1) {
             etaString = "Due";
         } else {
-            etaString = `${etaMinutes} min`;
+            etaString = `${difference} min`;
         } //end if
 
         let eta = $("<td>").text(etaString);
@@ -212,7 +218,7 @@
             rowClass = "table-danger";
 
             popoverContent = "This bus is delayed.";
-        } else if ((etaMinutes !== null) && (etaMinutes <= 1)) {
+        } else if (difference <= 1) {
             rowClass = "table-success";
 
             popoverContent = "This bus is due.";
@@ -272,7 +278,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/get-buses",
+            "url": "http://localhost:8080/get-buses",
             "data": data,
             "success": function (response) {
                 let buses = JSON.parse(response);

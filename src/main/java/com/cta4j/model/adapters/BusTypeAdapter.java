@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Logan Kulinski
+ * Copyright (c) 2022 Logan Kulinski
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,12 @@ import org.apache.logging.log4j.LogManager;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Objects;
-import com.google.gson.stream.JsonReader;
 import com.cta4j.model.bus.Type;
+import java.time.LocalDateTime;
+import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * A type adapter for the {@link Bus} class.
@@ -104,22 +107,51 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
 
         jsonWriter.name("type");
 
-        String typeString = bus.type()
-                               .toString();
+        Type type = bus.type();
+
+        String typeString;
+
+        if (type == null) {
+            typeString = null;
+        } else {
+            typeString = type.toString();
+        } //end if
 
         jsonWriter.value(typeString);
+
+        jsonWriter.name("prediction_time");
+
+        LocalDateTime predictionTime = bus.predictionTime();
+
+        String predictionTimeString;
+
+        if (predictionTime == null) {
+            predictionTimeString = null;
+        } else {
+            predictionTimeString = predictionTime.toString();
+        } //end if
+
+        jsonWriter.value(predictionTimeString);
+
+        jsonWriter.name("arrival_time");
+
+        LocalDateTime arrivalTime = bus.arrivalTime();
+
+        String arrivalTimeString;
+
+        if (arrivalTime == null) {
+            arrivalTimeString = null;
+        } else {
+            arrivalTimeString = arrivalTime.toString();
+        } //end if
+
+        jsonWriter.value(arrivalTimeString);
 
         jsonWriter.name("delayed");
 
         Boolean delayed = bus.delayed();
 
         jsonWriter.value(delayed);
-
-        jsonWriter.name("eta_minutes");
-
-        Integer etaMinutes = bus.etaMinutes();
-
-        jsonWriter.value(etaMinutes);
 
         jsonWriter.endObject();
     } //writeBus
@@ -145,9 +177,11 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
 
         Type type = null;
 
-        Boolean delayed = null;
+        LocalDateTime predictionTime = null;
 
-        Integer etaMinutes = null;
+        LocalDateTime arrivalTime = null;
+
+        Boolean delayed = null;
 
         jsonReader.beginObject();
 
@@ -192,35 +226,64 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
                         } //default
                     };
                 } //case "typ"
-                case "dly" -> delayed = jsonReader.nextBoolean();
-                case "prdctdn" -> {
-                    String etaMinutesString = jsonReader.nextString();
+                case "tmstmp" -> {
+                    String predictionTimeString = jsonReader.nextString();
 
-                    String dueString = "DUE";
+                    String formatterPattern = "yyyyMMdd HH:mm";
 
-                    String delayedString = "DLY";
-
-                    if (etaMinutesString.equalsIgnoreCase(dueString)) {
-                        etaMinutesString = "0";
-                    } else if (etaMinutesString.equalsIgnoreCase(delayedString)) {
-                        continue;
-                    } //end if
+                    DateTimeFormatter formatter;
 
                     try {
-                        etaMinutes = Integer.parseInt(etaMinutesString);
-                    } catch (NumberFormatException e) {
+                        formatter = DateTimeFormatter.ofPattern(formatterPattern);
+                    } catch (IllegalArgumentException e) {
                         LOGGER.atError()
                               .withThrowable(e)
-                              .log("the response includes a malformed ETA");
+                              .log("the prediction time formatter pattern is malformed");
+
+                        continue;
                     } //end try catch
-                } //case "prdctdn"
+
+                    try {
+                        predictionTime = LocalDateTime.parse(predictionTimeString, formatter);
+                    } catch (DateTimeParseException e) {
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed prediction time");
+                    } //end try catch
+                } //case "prdtm"
+                case "prdtm" -> {
+                    String arrivalTimeString = jsonReader.nextString();
+
+                    String formatterPattern = "yyyyMMdd HH:mm";
+
+                    DateTimeFormatter formatter;
+
+                    try {
+                        formatter = DateTimeFormatter.ofPattern(formatterPattern);
+                    } catch (IllegalArgumentException e) {
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the arrival time formatter pattern is malformed");
+
+                        continue;
+                    } //end try catch
+
+                    try {
+                        arrivalTime = LocalDateTime.parse(arrivalTimeString, formatter);
+                    } catch (DateTimeParseException e) {
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed arrival time");
+                    } //end try catch
+                } //case "prdtm"
+                case "dly" -> delayed = jsonReader.nextBoolean();
                 default -> jsonReader.nextString();
             } //end switch
         } //end while
 
         jsonReader.endObject();
 
-        return new Bus(id, route, destination, direction, stop, type, delayed, etaMinutes);
+        return new Bus(id, route, destination, direction, stop, type, predictionTime, arrivalTime, delayed);
     } //readBus
 
     /**
