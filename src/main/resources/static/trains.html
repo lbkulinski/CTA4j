@@ -164,9 +164,11 @@
                 return;
             } //end if
 
-            $("#input_map_id").val(mapId);
+            let search_parameters = new URLSearchParams(window.location.search);
 
-            updateTrains();
+            search_parameters.set("map_id", mapId);
+
+            window.location.search = search_parameters.toString();
         });
 
         $("#div_stations_error").hide();
