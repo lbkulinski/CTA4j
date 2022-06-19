@@ -24,6 +24,7 @@
 
 package com.cta4j;
 
+import com.google.gson.*;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import com.cta4j.model.train.Train;
@@ -41,13 +42,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpClient;
 import java.io.UncheckedIOException;
 import java.net.http.HttpResponse;
-import com.google.gson.GsonBuilder;
+
 import com.cta4j.model.adapters.TrainTypeAdapter;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonArray;
+
 import java.util.HashSet;
 import com.cta4j.model.bus.Bus;
 import com.cta4j.model.adapters.BusTypeAdapter;
@@ -64,8 +61,52 @@ public final class ChicagoTransitAuthority {
      */
     private static final Logger LOGGER;
 
+    private static final String TRAIN_API_KEY;
+
+    private static final String BUS_API_KEY;
+
     static {
-        LOGGER = LogManager.getLogger(ChicagoTransitAuthority.class);
+        LOGGER = LogManager.getLogger();
+
+        Properties properties = new Properties();
+
+        String pathString = "src/main/resources/api-key.properties";
+
+        Path path = Path.of(pathString);
+
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            properties.load(reader);
+        } catch (IOException e) {
+            String message = "Error in reading the API key file";
+
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log(message);
+
+            throw new IllegalStateException(message);
+        } //end try catch
+
+        TRAIN_API_KEY = properties.getProperty("train_key");
+
+        if (TRAIN_API_KEY == null) {
+            String message = "Error in reading the train API key";
+
+            LOGGER.atError()
+                  .log(message);
+
+            throw new IllegalStateException(message);
+        } //end if
+
+        BUS_API_KEY = properties.getProperty("bus_key");
+
+        if (BUS_API_KEY == null) {
+            String message = "Error in reading the bus API key";
+
+            LOGGER.atError()
+                  .log(message);
+
+            throw new IllegalStateException(message);
+        } //end if
     } //static
 
     /**
@@ -94,39 +135,12 @@ public final class ChicagoTransitAuthority {
               .forEach(routeName -> Objects.requireNonNull(routeName,
                                                            "a route name in the specified array is null"));
 
-        Properties properties = new Properties();
-
-        String fileName = "src/main/resources/api-key.properties";
-
-        Path path = Path.of(fileName);
-
-        BufferedReader bufferedReader;
-
-        try {
-            bufferedReader = Files.newBufferedReader(path);
-
-            properties.load(bufferedReader);
-        } catch (IOException e) {
-            LOGGER.atError()
-                  .withThrowable(e)
-                  .log("Error in reading the API key file");
-        } //end try catch
-
-        String apiKey = properties.getProperty("train_key");
-
-        if (apiKey == null) {
-            LOGGER.atError()
-                  .log("\"train_key\" could not be found in \"api-key.properties\"");
-
-            return Set.of();
-        } //end if
-
         String uriString;
 
         if (routeNames.length == 0) {
             uriString = """
                         https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx\
-                        ?key=%s&mapid=%s&outputType=JSON""".formatted(apiKey, mapId);
+                        ?key=%s&mapid=%s&outputType=JSON""".formatted(TRAIN_API_KEY, mapId);
         } else {
             String routeNamesString = Arrays.stream(routeNames)
                                             .map(String::toLowerCase)
@@ -136,7 +150,7 @@ public final class ChicagoTransitAuthority {
 
             uriString = """
                         https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx\
-                        ?key=%s&mapid=%s&%s&outputType=JSON""".formatted(apiKey, mapId, routeNamesString);
+                        ?key=%s&mapid=%s&%s&outputType=JSON""".formatted(TRAIN_API_KEY, mapId, routeNamesString);
         } //end if
 
         URI uri;
@@ -270,6 +284,122 @@ public final class ChicagoTransitAuthority {
         return trains;
     } //getTrains
 
+    public static Set<String> getBusRoutes() {
+        //http://www.ctabustracker.com/bustime/api/v2/getroutes
+
+        String uriString = "http://www.ctabustracker.com/bustime/api/v2/getroutes?key=%s".formatted(BUS_API_KEY);
+
+        URI uri;
+
+        try {
+            uri = URI.create(uriString);
+        } catch (IllegalArgumentException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the API URI");
+
+            return Set.of();
+        } //end try catch
+
+        HttpRequest request;
+
+        try {
+             request = HttpRequest.newBuilder(uri)
+                                  .GET()
+                                  .build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the API request");
+
+            return Set.of();
+        } //end try catch
+
+        HttpClient client;
+
+        try {
+            client = HttpClient.newHttpClient();
+        } catch (UncheckedIOException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in constructing the HTTP client");
+
+            return Set.of();
+        } //end try catch
+
+        HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString();
+
+        HttpResponse<String> response;
+
+        try {
+            response = client.send(request, bodyHandler);
+        } catch (IOException | InterruptedException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in sending the API request");
+
+            return Set.of();
+        } //end try catch
+
+        String json = response.body();
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+
+        Gson gson = gsonBuilder.create();
+
+        JsonObject jsonObject;
+
+        try {
+            jsonObject = gson.fromJson(json, JsonObject.class);
+        } catch (JsonSyntaxException e) {
+            LOGGER.atError()
+                  .withThrowable(e)
+                  .log("Error in parsing the response from the API");
+
+            return Set.of();
+        } //end try catch
+
+        if (!jsonObject.has("bustime-response")) {
+            LOGGER.atError()
+                  .log("Error in parsing the response from the API. The member \"bustime-response\" is missing");
+
+            return Set.of();
+        } //end if
+
+        JsonElement bustimeResponseElement = jsonObject.get("bustime-response");
+
+        if (!bustimeResponseElement.isJsonObject()) {
+            LOGGER.atError()
+                  .log("Error in parsing the response from the API. The member \"bustime-response\" is not an object");
+
+            return Set.of();
+        } //end if
+
+        /*
+        Set<String> routes = new HashSet<>();
+
+        for (JsonElement jsonElement : jsonArray) {
+            if (!jsonElement.isJsonPrimitive()) {
+                continue;
+            } //end if
+
+            JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+
+            if (!jsonPrimitive.isString()) {
+                continue;
+            } //end if
+
+            String route = jsonPrimitive.getAsString();
+
+            routes.add(route);
+        } //end for
+
+        return routes;
+         */
+
+        return null;
+    } //getBusRoutes
+
     /**
      * Returns the {@link Bus}es using the specified stop ID and routes of the Chicago Transit Authority. If no routes
      * are provided, all routes are returned.
@@ -286,39 +416,12 @@ public final class ChicagoTransitAuthority {
               .forEach(routeName -> Objects.requireNonNull(routeName,
                                                            "a route in the specified array is null"));
 
-        Properties properties = new Properties();
-
-        String fileName = "src/main/resources/api-key.properties";
-
-        Path path = Path.of(fileName);
-
-        BufferedReader bufferedReader;
-
-        try {
-            bufferedReader = Files.newBufferedReader(path);
-
-            properties.load(bufferedReader);
-        } catch (IOException e) {
-            LOGGER.atError()
-                  .withThrowable(e)
-                  .log("Error in reading the API key file");
-        } //end try catch
-
-        String apiKey = properties.getProperty("bus_key");
-
-        if (apiKey == null) {
-            LOGGER.atError()
-                  .log("\"bus_key\" could not be found in \"api-key.properties\"");
-
-            return Set.of();
-        } //end if
-
         String uriString;
 
         if (routes.length == 0) {
             uriString = """
                         http://www.ctabustracker.com/bustime/api/v2/getpredictions\
-                        ?key=%s&stpid=%s&format=json""".formatted(apiKey, stopId);
+                        ?key=%s&stpid=%s&format=json""".formatted(BUS_API_KEY, stopId);
         } else {
             String routesString = Arrays.stream(routes)
                                         .map(String::toLowerCase)
@@ -328,7 +431,7 @@ public final class ChicagoTransitAuthority {
 
             uriString = """
                         http://www.ctabustracker.com/bustime/api/v2/getpredictions\
-                        ?key=%s&stpid=%s&%s&format=json""".formatted(apiKey, stopId, routesString);
+                        ?key=%s&stpid=%s&%s&format=json""".formatted(BUS_API_KEY, stopId, routesString);
         } //end if
 
         URI uri;
