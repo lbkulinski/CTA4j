@@ -74,23 +74,18 @@
 <div class="container mt-3">
     <div class="card mb-3" style="max-width: 30rem;">
         <div class="card-body">
-            <form id="form_stop_id" class="row row-cols-sm-auto g-2 align-items-center">
-                <div class="col-9">
-                    <div class="input-group">
-                        <div class="input-group-text">Stop ID</div>
-                        <input type="text" class="form-control shadow-none" id="input_stop_id"
-                               aria-describedby="The input for specifying a stop ID">
-                        <div class="invalid-tooltip">
-                            Please enter a valid stop ID.
-                        </div>
-                    </div>
-                </div>
-                <div class="col-3">
-                    <button type="button" id="button_search" class="btn btn-primary" style="width: 100%;" disabled>
-                        Search
-                    </button>
-                </div>
-            </form>
+            <label for="select_route">
+                Route
+            </label>
+            <select id="select_route" class="form-control mb-3"></select>
+            <label for="select_direction">
+                Direction
+            </label>
+            <select id="select_direction" class="form-control mb-3"></select>
+            <label for="select_stop">
+                Stop
+            </label>
+            <select id="select_stop" class="form-control"></select>
         </div>
     </div>
     <div class="card">

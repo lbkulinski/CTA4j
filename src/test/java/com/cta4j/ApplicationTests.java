@@ -24,9 +24,12 @@
 
 package com.cta4j;
 
+import com.cta4j.model.bus.Stop;
 import com.cta4j.utils.BusUtils;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 @SpringBootTest
 public class ApplicationTests {
@@ -35,6 +38,12 @@ public class ApplicationTests {
     } //contextLoads
 
     public static void main(String[] args) {
-        System.out.println(BusUtils.getBusRoutes());
-    }
+        String route = "55";
+
+        String direction = "Eastbound";
+
+        Set<Stop> stops = BusUtils.getStops(route, direction);
+
+        stops.forEach(System.out::println);
+    } //main
 }
