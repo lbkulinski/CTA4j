@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.cta4j.model.adapters;
+package com.cta4j.model.adapters.bus;
 
 import com.google.gson.TypeAdapter;
 import com.cta4j.model.bus.Bus;

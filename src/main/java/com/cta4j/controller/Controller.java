@@ -22,20 +22,21 @@
  * SOFTWARE.
  */
 
-package com.cta4j;
+package com.cta4j.controller;
 
+import com.cta4j.ChicagoTransitAuthority;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Set;
 import com.cta4j.model.train.Train;
 import com.google.gson.GsonBuilder;
-import com.cta4j.model.adapters.TrainTypeAdapter;
+import com.cta4j.model.adapters.train.TrainTypeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.cta4j.model.bus.Bus;
-import com.cta4j.model.adapters.BusTypeAdapter;
+import com.cta4j.model.adapters.bus.BusTypeAdapter;
 
 /**
  * A controller of the CTA4j application.

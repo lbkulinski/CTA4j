@@ -24,6 +24,7 @@
 
 package com.cta4j;
 
+import com.cta4j.utils.BusUtils;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.junit.jupiter.api.Test;
 
@@ -32,4 +33,8 @@ public class ApplicationTests {
     @Test
     public void contextLoads() {
     } //contextLoads
+
+    public static void main(String[] args) {
+        System.out.println(BusUtils.getBusRoutes());
+    }
 }

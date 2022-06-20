@@ -43,11 +43,11 @@ import java.net.http.HttpClient;
 import java.io.UncheckedIOException;
 import java.net.http.HttpResponse;
 
-import com.cta4j.model.adapters.TrainTypeAdapter;
+import com.cta4j.model.adapters.train.TrainTypeAdapter;
 
 import java.util.HashSet;
 import com.cta4j.model.bus.Bus;
-import com.cta4j.model.adapters.BusTypeAdapter;
+import com.cta4j.model.adapters.bus.BusTypeAdapter;
 
 /**
  * A set of utility methods used to interact with the CTA's API.
