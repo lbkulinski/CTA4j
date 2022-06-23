@@ -360,7 +360,7 @@
         } //end if
 
         let data = {
-            "map_id": mapId
+            "mapId": mapId
         };
 
         let urlParameters = new URLSearchParams(window.location.search);
@@ -371,7 +371,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/train",
+            "url": "https://www.cta4j.com/api/train",
             "data": data,
             "success": function (response) {
                 let trainsDiv = $("#div_trains");

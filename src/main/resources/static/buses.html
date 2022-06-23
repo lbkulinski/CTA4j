@@ -70,18 +70,31 @@
     </script>
 </head>
 <body>
-<input type="hidden" id="hidden_input_stop_id">
+<form id="form_hidden_inputs" method="GET" action="http://localhost:8080/buses.html">
+    <input id="hidden_input_route" name="route" type="hidden">
+    <input id="hidden_input_direction" name="direction" type="hidden">
+    <input id="hidden_input_stop_id" name="stopId" type="hidden">
+</form>
 <div class="container mt-3">
     <div class="card mb-3" style="max-width: 60rem;">
         <div class="card-body">
             <div class="row">
                 <div class="col-4">
+                    <label for="select_route">
+                        Route
+                    </label>
                     <select id="select_route" class="form-control mb-3" disabled></select>
                 </div>
                 <div class="col-4">
+                    <label for="select_direction">
+                        Direction
+                    </label>
                     <select id="select_direction" class="form-control mb-3" disabled></select>
                 </div>
                 <div class="col-4">
+                    <label for="select_stop">
+                        Stop
+                    </label>
                     <select id="select_stop" class="form-control" disabled></select>
                 </div>
             </div>
@@ -126,9 +139,9 @@
         integrity="sha256-AFAYEOkzB6iIKnTYZOdUf9FFje6lOTYdwRJKwTN5mks=" crossorigin="anonymous"></script>
 <script>
     function loadRoutes() {
-        $.ajax({
+        return $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/bus/route",
+            "url": "https://www.cta4j.com/api/bus/route",
             "success": function (response) {
                 if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
                     return;
@@ -163,49 +176,10 @@
         });
     } //loadRoutes
 
-    function loadDirections(route) {
-        $.ajax({
-            "type": "GET",
-            "url": "http://localhost:8080/api/bus/direction",
-            "data": {
-                "route": route
-            },
-            "success": function (response) {
-                if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
-                    return;
-                } //end if
-
-                let directions = response.content;
-
-                let directionOptions = [];
-
-                directions.forEach(function (direction) {
-                    let directionOption = $("<option>").val(direction)
-                                                       .text(direction);
-
-                    directionOptions.push(directionOption);
-                });
-
-                $("#select_direction").html(directionOptions)
-                                      .prop("disabled", false)
-                                      .val(null);
-
-                $("#div_buses_error").hide();
-
-                $("#div_buses").show();
-            },
-            "error": function () {
-                $("#div_buses").hide();
-
-                $("#div_buses_error").show();
-            }
-        });
-    } //loadDirections
-
     function loadStops(route, direction) {
-        $.ajax({
+        return $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/bus/stop",
+            "url": "https://www.cta4j.com/api/bus/stop",
             "data": {
                 "route": route,
                 "direction": direction
@@ -245,6 +219,84 @@
             }
         });
     } //loadStops
+
+    function prepopulateStop(urlParameters) {
+        let route = $("#hidden_input_route").val();
+
+        let direction = $("#hidden_input_direction").val();
+
+        let loadStopsAjax = loadStops(route, direction);
+
+        $.when(loadStopsAjax)
+         .done(function () {
+             let stopId = urlParameters.get("stopId");
+
+             $("#select_route").val(route)
+                               .trigger("change.select2");
+
+             $("#select_direction").val(direction)
+                                   .trigger("change.select2");
+
+             $("#select_stop").val(stopId)
+                              .trigger("change.select2");
+         });
+    } //prepopulateStop
+
+    function loadDirections(route) {
+        return $.ajax({
+            "type": "GET",
+            "url": "https://www.cta4j.com/api/bus/direction",
+            "data": {
+                "route": route
+            },
+            "success": function (response) {
+                if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
+                    return;
+                } //end if
+
+                let directions = response.content;
+
+                let directionOptions = [];
+
+                directions.forEach(function (direction) {
+                    let directionOption = $("<option>").val(direction)
+                                                       .text(direction);
+
+                    directionOptions.push(directionOption);
+                });
+
+                $("#select_direction").html(directionOptions)
+                                      .prop("disabled", false)
+                                      .val(null);
+
+                $("#div_buses_error").hide();
+
+                $("#div_buses").show();
+            },
+            "error": function () {
+                $("#div_buses").hide();
+
+                $("#div_buses_error").show();
+            }
+        });
+    } //loadDirections
+
+    function prepopulateDirection(urlParameters) {
+        let route = $("#hidden_input_route").val();
+
+        let loadDirectionsAjax = loadDirections(route);
+
+        $.when(loadDirectionsAjax)
+         .done(function () {
+             let direction = urlParameters.get("direction");
+
+             $("#hidden_input_direction").val(direction);
+
+             if (urlParameters.has("stopId")) {
+                 prepopulateStop(urlParameters);
+             } //end if
+         });
+    } //prepopulateDirections
 
     function compareBuses(bus0, bus1) {
         if (!bus0.hasOwnProperty("route") || !bus0.hasOwnProperty("destination") ||
@@ -419,7 +471,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/bus",
+            "url": "https://www.cta4j.com/api/bus",
             "data": data,
             "success": function (response) {
                 let busesDiv = $("#div_buses");
@@ -449,23 +501,19 @@
     $(function () {
         let routeSelect = $("#select_route");
 
-        routeSelect.select2({
-            "placeholder": "Select a route"
-        });
-
-        loadRoutes();
+        routeSelect.select2();
 
         routeSelect.change(function () {
             let route = $(this).val();
 
             loadDirections(route);
+
+            $("#hidden_input_route").val(route);
         });
 
         let directionSelect = $("#select_direction");
 
-        directionSelect.select2({
-            "placeholder": "Select a direction"
-        });
+        directionSelect.select2();
 
         directionSelect.change(function () {
             let route = $("#select_route").val();
@@ -473,35 +521,46 @@
             let direction = $(this).val();
 
             loadStops(route, direction);
+
+            $("#hidden_input_direction").val(direction);
         });
 
         let stopSelect = $("#select_stop");
 
-        stopSelect.select2({
-            "placeholder": "Select a stop"
-        });
+        stopSelect.select2();
 
         stopSelect.change(function () {
             let stopId = $(this).val();
 
             $("#hidden_input_stop_id").val(stopId);
 
-            updateBuses();
+            $("#form_hidden_inputs").submit();
         });
 
-        /*
         let urlParameters = new URLSearchParams(window.location.search);
 
-        let stopId = null;
-
-        if (urlParameters.has("stop_id")) {
-            stopId = urlParameters.get("stop_id");
+        if (urlParameters.has("stopId")) {
+            let stopId = urlParameters.get("stopId");
 
             $("#hidden_input_stop_id").val(stopId);
+
+            updateBuses();
         } //end if
 
-        updateBuses();
-         */
+        let loadRoutesAjax = loadRoutes();
+
+        $.when(loadRoutesAjax)
+         .done(function () {
+             if (urlParameters.has("route")) {
+                 let route = urlParameters.get("route");
+
+                 $("#hidden_input_route").val(route);
+             } //end if
+
+             if (urlParameters.has("direction")) {
+                 prepopulateDirection(urlParameters);
+             } //end if
+         });
 
         let timeout = 60000;
 

@@ -40,7 +40,7 @@ import com.cta4j.train.model.Train;
  * A controller of the CTA4j application.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version June 19, 2022
+ * @version June 23, 2022
  */
 @RestController
 @RequestMapping("/api/train")
@@ -53,8 +53,8 @@ public final class TrainController {
      * @return a JSON response containing information about trains using the specified map ID and routes
      */
     @GetMapping
-    public ResponseEntity<Body<Set<Train>>> read(@RequestParam(value = "map_id") int mapId,
-                                                 @RequestParam(value = "routes", required = false) String[] routes) {
+    public ResponseEntity<Body<Set<Train>>> read(@RequestParam int mapId,
+                                                 @RequestParam(value = "route[]", required = false) String[] routes) {
         if (routes == null) {
             routes = new String[0];
         } //end if
