@@ -54,6 +54,17 @@
         .popover .popover-arrow::before, .popover .popover-arrow::after {
             display: none;
         }
+
+        .input-group > .select2-container--bootstrap {
+            width: auto;
+            flex: 1 1 auto;
+        }
+
+        .input-group > .select2-container--bootstrap .select2-selection--single {
+            height: 100%;
+            line-height: inherit;
+            padding: 0.5rem 1rem;
+        }
     </style>
     <title id="title">CTA4j Bus Tracker</title>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ENS0NL67SC"></script>
@@ -70,34 +81,23 @@
     </script>
 </head>
 <body>
-<form id="form_hidden_inputs" method="GET" action="http://localhost:8080/buses.html">
-    <input id="hidden_input_route" name="route" type="hidden">
-    <input id="hidden_input_direction" name="direction" type="hidden">
-    <input id="hidden_input_stop_id" name="stopId" type="hidden">
-</form>
+<input id="hidden_input_route" name="route" type="hidden">
+<input id="hidden_input_direction" name="direction" type="hidden">
+<input id="hidden_input_stop_id" name="stopId" type="hidden">
 <div class="container mt-3">
-    <div class="card mb-3" style="max-width: 60rem;">
+    <div class="card mb-3" style="max-width: 40rem;">
         <div class="card-body">
-            <div class="row">
-                <div class="col-4">
-                    <label for="select_route">
-                        Route
-                    </label>
-                    <select id="select_route" class="form-control mb-3" disabled></select>
+            <form>
+                <div class="input-group mb-2">
+                    <select id="select_route" class="form-control" disabled></select>
                 </div>
-                <div class="col-4">
-                    <label for="select_direction">
-                        Direction
-                    </label>
-                    <select id="select_direction" class="form-control mb-3" disabled></select>
+                <div class="input-group mb-2">
+                    <select id="select_direction" class="form-control" disabled></select>
                 </div>
-                <div class="col-4">
-                    <label for="select_stop">
-                        Stop
-                    </label>
+                <div class="input-group">
                     <select id="select_stop" class="form-control" disabled></select>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
     <div class="card">
@@ -141,7 +141,7 @@
     function loadRoutes() {
         return $.ajax({
             "type": "GET",
-            "url": "https://www.cta4j.com/api/bus/route",
+            "url": "http://localhost:8080/api/bus/route",
             "success": function (response) {
                 if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
                     return;
@@ -179,7 +179,7 @@
     function loadStops(route, direction) {
         return $.ajax({
             "type": "GET",
-            "url": "https://www.cta4j.com/api/bus/stop",
+            "url": "http://localhost:8080/api/bus/stop",
             "data": {
                 "route": route,
                 "direction": direction
@@ -245,7 +245,7 @@
     function loadDirections(route) {
         return $.ajax({
             "type": "GET",
-            "url": "https://www.cta4j.com/api/bus/direction",
+            "url": "http://localhost:8080/api/bus/direction",
             "data": {
                 "route": route
             },
@@ -300,12 +300,12 @@
 
     function compareBuses(bus0, bus1) {
         if (!bus0.hasOwnProperty("route") || !bus0.hasOwnProperty("destination") ||
-            !bus0.hasOwnProperty("arrival_time")) {
+            !bus0.hasOwnProperty("typeTime")) {
             return 0;
         } //end if
 
         if (!bus1.hasOwnProperty("route") || !bus1.hasOwnProperty("destination") ||
-            !bus1.hasOwnProperty("arrival_time")) {
+            !bus1.hasOwnProperty("typeTime")) {
             return 0;
         } //end if
 
@@ -319,7 +319,7 @@
 
         let destination0 = bus0.destination;
 
-        let date0 = new Date(bus0.arrival_time);
+        let date0 = new Date(bus0.typeTime);
 
         let route1 = bus1.route;
 
@@ -331,7 +331,7 @@
 
         let destination1 = bus1.destination;
 
-        let date1 = new Date(bus1.arrival_time);
+        let date1 = new Date(bus1.typeTime);
 
         if (routeId0 < routeId1) {
             return -1;
@@ -471,7 +471,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "https://www.cta4j.com/api/bus",
+            "url": "http://localhost:8080/api/bus",
             "data": data,
             "success": function (response) {
                 let busesDiv = $("#div_buses");
@@ -501,19 +501,37 @@
     $(function () {
         let routeSelect = $("#select_route");
 
-        routeSelect.select2();
+        routeSelect.select2({
+            "placeholder": "Route"
+        });
 
         routeSelect.change(function () {
             let route = $(this).val();
 
             loadDirections(route);
 
+            $("#select_stop").val(null)
+                             .trigger("change")
+                             .prop("disabled", true);
+
             $("#hidden_input_route").val(route);
+
+            $("#hidden_input_direction").val(null);
+
+            $("#hidden_input_stop_id").val(null);
+
+            let url = new URL(window.location);
+
+            url.searchParams.set("route", route);
+
+            window.history.pushState({}, '', url);
         });
 
         let directionSelect = $("#select_direction");
 
-        directionSelect.select2();
+        directionSelect.select2({
+            "placeholder": "Direction"
+        });
 
         directionSelect.change(function () {
             let route = $("#select_route").val();
@@ -523,18 +541,32 @@
             loadStops(route, direction);
 
             $("#hidden_input_direction").val(direction);
+
+            let url = new URL(window.location);
+
+            url.searchParams.set("direction", direction);
+
+            window.history.pushState({}, '', url);
         });
 
         let stopSelect = $("#select_stop");
 
-        stopSelect.select2();
+        stopSelect.select2({
+            "placeholder": "Stop"
+        });
 
         stopSelect.change(function () {
             let stopId = $(this).val();
 
             $("#hidden_input_stop_id").val(stopId);
 
-            $("#form_hidden_inputs").submit();
+            updateBuses();
+
+            let url = new URL(window.location);
+
+            url.searchParams.set("stopId", stopId);
+
+            window.history.pushState({}, '', url);
         });
 
         let urlParameters = new URLSearchParams(window.location.search);
