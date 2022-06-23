@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Logan Kulinski
+ * Copyright (c) 2022 Logan Kulinski
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,31 +22,24 @@
  * SOFTWARE.
  */
 
-package com.cta4j.model.train;
+package com.cta4j.bus.model;
 
 import java.time.LocalDateTime;
 
 /**
- * A train run by the Chicago Transit Authority.
+ * A bus run by the Chicago Transit Authority.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 31, 2021
- * @param run the run of this train
- * @param route the route of this train
- * @param destination the destination of this train
- * @param station the station of this train
- * @param description the description of this train
- * @param predictionTime the prediction time of this train
- * @param arrivalTime the arrival time of this train
- * @param due the due flag of this train
- * @param scheduled the scheduled flag of this train
- * @param fault the fault flag of this train
- * @param delayed the delayed flag of this train
- * @param latitude the latitude of this train
- * @param longitude the longitude of this train
- * @param heading the heading of this train
+ * @version June 23, 2022
+ * @param id the ID of this bus
+ * @param route the route of this bus
+ * @param destination the destination of this bus
+ * @param stop the stop of this bus
+ * @param type the type of this bus
+ * @param predictionTime the prediction time of this bus
+ * @param typeTime the type time of this bus
+ * @param delayed the delayed flag of this bus
  */
-public record Train(Integer run, Route route, String destination, String station, String description,
-                    LocalDateTime predictionTime, LocalDateTime arrivalTime, Boolean due, Boolean scheduled,
-                    Boolean fault, Boolean delayed, Double latitude, Double longitude, Integer heading) {
+public record Bus(Integer id, Stop stop, Route route, String direction, String destination, Type type,
+                  LocalDateTime predictionTime, LocalDateTime typeTime, Boolean delayed) {
 }

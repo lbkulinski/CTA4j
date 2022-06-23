@@ -22,52 +22,31 @@
  * SOFTWARE.
  */
 
-package com.cta4j.model.train;
+package com.cta4j.train.model;
+
+import java.time.LocalDateTime;
 
 /**
- * A train route of the Chicago Transit Authority.
+ * A train run by the Chicago Transit Authority.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
  * @version December 31, 2021
+ * @param run the run of this train
+ * @param route the route of this train
+ * @param destination the destination of this train
+ * @param station the station of this train
+ * @param description the description of this train
+ * @param predictionTime the prediction time of this train
+ * @param arrivalTime the arrival time of this train
+ * @param due the due flag of this train
+ * @param scheduled the scheduled flag of this train
+ * @param fault the fault flag of this train
+ * @param delayed the delayed flag of this train
+ * @param latitude the latitude of this train
+ * @param longitude the longitude of this train
+ * @param heading the heading of this train
  */
-public enum Route {
-    /**
-     * The singleton instance representing the red {@link Route}.
-     */
-    RED,
-
-    /**
-     * The singleton instance representing the blue {@link Route}.
-     */
-    BLUE,
-
-    /**
-     * The singleton instance representing the brown {@link Route}.
-     */
-    BROWN,
-
-    /**
-     * The singleton instance representing the green {@link Route}.
-     */
-    GREEN,
-
-    /**
-     * The singleton instance representing the orange {@link Route}.
-     */
-    ORANGE,
-
-    /**
-     * The singleton instance representing the purple {@link Route}.
-     */
-    PURPLE,
-
-    /**
-     * The singleton instance representing the pink {@link Route}.
-     */
-    PINK,
-
-    /**
-     * The singleton instance representing the yellow {@link Route}.
-     */
-    YELLOW
+public record Train(Integer run, Route route, String destination, String station, String description,
+                    LocalDateTime predictionTime, LocalDateTime arrivalTime, Boolean due, Boolean scheduled,
+                    Boolean fault, Boolean delayed, Double latitude, Double longitude, Integer heading) {
 }

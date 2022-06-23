@@ -1,69 +1,30 @@
-/*
- * MIT License
- *
- * Copyright (c) 2021 Logan Kulinski
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+package com.cta4j.train.utils;
 
-package com.cta4j;
-
+import com.cta4j.train.model.Route;
+import com.cta4j.train.model.Train;
+import com.cta4j.train.model.adapters.TrainTypeAdapter;
 import com.google.gson.*;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import com.cta4j.model.train.Train;
-import com.cta4j.model.train.Route;
-import java.util.Set;
-import java.util.Objects;
-import java.util.Arrays;
-import java.util.Properties;
-import java.nio.file.Path;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
-import java.nio.file.Files;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpRequest;
-import java.net.http.HttpClient;
 import java.io.UncheckedIOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
-import com.cta4j.model.adapters.train.TrainTypeAdapter;
-
-import java.util.HashSet;
-import com.cta4j.model.bus.Bus;
-import com.cta4j.model.adapters.bus.BusTypeAdapter;
-
-/**
- * A set of utility methods used to interact with the CTA's API.
- *
- * @author Logan Kulinski, lbkulinski@gmail.com
- * @version January 1, 2022
- */
-public final class ChicagoTransitAuthority {
+public final class TrainUtils {
     /**
-     * The {@link Logger} of the {@link ChicagoTransitAuthority} class.
+     * The {@link Logger} of the {@link TrainUtils} class.
      */
     private static final Logger LOGGER;
 
     private static final String TRAIN_API_KEY;
-
-    private static final String BUS_API_KEY;
 
     static {
         LOGGER = LogManager.getLogger();
@@ -96,27 +57,11 @@ public final class ChicagoTransitAuthority {
 
             throw new IllegalStateException(message);
         } //end if
-
-        BUS_API_KEY = properties.getProperty("bus_key");
-
-        if (BUS_API_KEY == null) {
-            String message = "Error in reading the bus API key";
-
-            LOGGER.atError()
-                  .log(message);
-
-            throw new IllegalStateException(message);
-        } //end if
     } //static
 
-    /**
-     * Throws an {@link InstantiationException}, as instance of type {@link ChicagoTransitAuthority} cannot be created.
-     *
-     * @throws InstantiationException if this constructor is invoked
-     */
-    private ChicagoTransitAuthority() throws InstantiationException {
-        throw new InstantiationException("instances of type ChicagoTransitAuthority cannot be created");
-    } //ChicagoTransitAuthority
+    private TrainUtils() throws InstantiationException {
+        throw new InstantiationException("instances of type TrainUtils cannot be created");
+    } //BusUtils
 
     /**
      * Returns the {@link Train}s using the specified map ID and route names of the Chicago Transit Authority. If no

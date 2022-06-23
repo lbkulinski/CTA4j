@@ -24,8 +24,8 @@
 
 package com.cta4j;
 
-import com.cta4j.model.bus.Stop;
-import com.cta4j.utils.BusUtils;
+import com.cta4j.bus.model.Stop;
+import com.cta4j.bus.utils.BusUtils;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.junit.jupiter.api.Test;
 

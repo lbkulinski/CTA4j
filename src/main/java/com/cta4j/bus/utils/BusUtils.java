@@ -1,11 +1,11 @@
-package com.cta4j.utils;
+package com.cta4j.bus.utils;
 
-import com.cta4j.model.adapters.bus.BusTypeAdapter;
-import com.cta4j.model.adapters.bus.RouteTypeAdapter;
-import com.cta4j.model.adapters.bus.StopTypeAdapter;
-import com.cta4j.model.bus.Bus;
-import com.cta4j.model.bus.Route;
-import com.cta4j.model.bus.Stop;
+import com.cta4j.bus.model.adapters.BusTypeAdapter;
+import com.cta4j.bus.model.adapters.RouteTypeAdapter;
+import com.cta4j.bus.model.adapters.StopTypeAdapter;
+import com.cta4j.bus.model.Bus;
+import com.cta4j.bus.model.Route;
+import com.cta4j.bus.model.Stop;
 import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,7 +72,7 @@ public final class BusUtils {
         throw new InstantiationException("instances of type BusUtils cannot be created");
     } //BusUtils
 
-    public static Set<Route> getBusRoutes() {
+    public static Set<Route> getRoutes() {
         String uriStringFormat = "http://www.ctabustracker.com/bustime/api/v2/getroutes?key=%s&format=json";
 
         String uriString = uriStringFormat.formatted(BUS_API_KEY);

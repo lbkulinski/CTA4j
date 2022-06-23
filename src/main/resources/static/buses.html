@@ -72,25 +72,22 @@
 <body>
 <input type="hidden" id="hidden_input_stop_id">
 <div class="container mt-3">
-    <div class="card mb-3" style="max-width: 30rem;">
+    <div class="card mb-3" style="max-width: 60rem;">
         <div class="card-body">
-            <label for="select_route">
-                Route
-            </label>
-            <select id="select_route" class="form-control mb-3"></select>
-            <label for="select_direction">
-                Direction
-            </label>
-            <select id="select_direction" class="form-control mb-3"></select>
-            <label for="select_stop">
-                Stop
-            </label>
-            <select id="select_stop" class="form-control"></select>
+            <div class="row">
+                <div class="col-4">
+                    <select id="select_route" class="form-control mb-3" disabled></select>
+                </div>
+                <div class="col-4">
+                    <select id="select_direction" class="form-control mb-3" disabled></select>
+                </div>
+                <div class="col-4">
+                    <select id="select_stop" class="form-control" disabled></select>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card">
-        <div id="div_stop_name" class="card-header">
-        </div>
         <div class="card-body">
             <div id="div_buses">
                 <table id="table_buses" class="table table-sm table-dark mt-0 mb-0">
@@ -128,6 +125,127 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"
         integrity="sha256-AFAYEOkzB6iIKnTYZOdUf9FFje6lOTYdwRJKwTN5mks=" crossorigin="anonymous"></script>
 <script>
+    function loadRoutes() {
+        $.ajax({
+            "type": "GET",
+            "url": "http://localhost:8080/api/bus/route",
+            "success": function (response) {
+                if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
+                    return;
+                } //end if
+
+                let routes = response.content;
+
+                let routeOptions = [];
+
+                routes.forEach(function (route) {
+                    if (!route.hasOwnProperty("id") || !route.hasOwnProperty("name")) {
+                        return;
+                    } //end if
+
+                    let routeText = `${route.name} (${route.id})`;
+
+                    let routeOption = $("<option>").val(route.id)
+                                                   .text(routeText);
+
+                    routeOptions.push(routeOption);
+                });
+
+                $("#select_route").append(routeOptions)
+                                  .prop("disabled", false)
+                                  .val(null);
+            },
+            "error": function () {
+                $("#div_buses").hide();
+
+                $("#div_buses_error").show();
+            }
+        });
+    } //loadRoutes
+
+    function loadDirections(route) {
+        $.ajax({
+            "type": "GET",
+            "url": "http://localhost:8080/api/bus/direction",
+            "data": {
+                "route": route
+            },
+            "success": function (response) {
+                if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
+                    return;
+                } //end if
+
+                let directions = response.content;
+
+                let directionOptions = [];
+
+                directions.forEach(function (direction) {
+                    let directionOption = $("<option>").val(direction)
+                                                       .text(direction);
+
+                    directionOptions.push(directionOption);
+                });
+
+                $("#select_direction").html(directionOptions)
+                                      .prop("disabled", false)
+                                      .val(null);
+
+                $("#div_buses_error").hide();
+
+                $("#div_buses").show();
+            },
+            "error": function () {
+                $("#div_buses").hide();
+
+                $("#div_buses_error").show();
+            }
+        });
+    } //loadDirections
+
+    function loadStops(route, direction) {
+        $.ajax({
+            "type": "GET",
+            "url": "http://localhost:8080/api/bus/stop",
+            "data": {
+                "route": route,
+                "direction": direction
+            },
+            "success": function (response) {
+                if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
+                    return;
+                } //end if
+
+                let stops = response.content;
+
+                let stopOptions = [];
+
+                stops.forEach(function (stop) {
+                    if (!stop.hasOwnProperty("id") || !stop.hasOwnProperty("name")) {
+                        return;
+                    } //end if
+
+                    let stopOption = $("<option>").val(stop.id)
+                                                  .text(stop.name);
+
+                    stopOptions.push(stopOption);
+                });
+
+                $("#select_stop").html(stopOptions)
+                                 .prop("disabled", false)
+                                 .val(null);
+
+                $("#div_buses_error").hide();
+
+                $("#div_buses").show();
+            },
+            "error": function () {
+                $("#div_buses").hide();
+
+                $("#div_buses_error").show();
+            }
+        });
+    } //loadStops
+
     function compareBuses(bus0, bus1) {
         if (!bus0.hasOwnProperty("route") || !bus0.hasOwnProperty("destination") ||
             !bus0.hasOwnProperty("arrival_time")) {
@@ -141,19 +259,31 @@
 
         let route0 = bus0.route;
 
+        if (!route0.hasOwnProperty("id")) {
+            return 0;
+        } //end if
+
+        let routeId0 = route0.id;
+
         let destination0 = bus0.destination;
 
         let date0 = new Date(bus0.arrival_time);
 
         let route1 = bus1.route;
 
+        if (!route1.hasOwnProperty("id")) {
+            return 0;
+        } //end if
+
+        let routeId1 = route1.id;
+
         let destination1 = bus1.destination;
 
         let date1 = new Date(bus1.arrival_time);
 
-        if (route0 < route1) {
+        if (routeId0 < routeId1) {
             return -1;
-        } else if (route0 > route1) {
+        } else if (routeId0 > routeId1) {
             return 1;
         } else if (destination0 < destination1) {
             return -1;
@@ -169,7 +299,7 @@
     } //compareBuses
 
     function getTableRow(bus) {
-        let properties = ["route", "destination", "stop", "id", "prediction_time", "arrival_time", "delayed"];
+        let properties = ["route", "destination", "stop", "id", "predictionTime", "typeTime", "delayed"];
 
         let error = false;
 
@@ -183,23 +313,27 @@
             return null;
         } //end if
 
-        $("#div_stop_name").text(bus.stop);
+        let busRoute = bus.route;
 
-        let route = $("<td>").text(bus.route);
+        if (!busRoute.hasOwnProperty("id")) {
+            return null;
+        } //end if
+
+        let route = $("<td>").text(busRoute.id);
 
         let destination = $("<td>").text(bus.destination);
 
         let id = $("<td>").text(bus.id);
 
-        let arrivalDate = new Date(bus.arrival_time);
+        let typeDate = new Date(bus.typeTime);
 
-        let arrivalMillis = arrivalDate.getTime();
+        let typeMillis = typeDate.getTime();
 
-        let predictionDate = new Date(bus.prediction_time);
+        let predictionDate = new Date(bus.predictionTime);
 
         let predictionMillis = predictionDate.getTime();
 
-        let difference = arrivalMillis - predictionMillis;
+        let difference = typeMillis - predictionMillis;
 
         let minuteMillis = 60000;
 
@@ -246,7 +380,7 @@
         return tableRow;
     } //getTableRow
 
-    function showTable(buses, div_buses) {
+    function showTable(buses, busesDiv) {
         let tableBody = $("#tbody_buses");
 
         tableBody.empty();
@@ -263,12 +397,10 @@
 
         $("#div_buses_error").hide();
 
-        div_buses.show();
+        busesDiv.show();
     } //showTable
 
     function updateBuses() {
-        $("#div_stop_name").text("");
-
         let stopId = $("#hidden_input_stop_id").val();
 
         if (!stopId) {
@@ -276,7 +408,7 @@
         } //end if
 
         let data = {
-            "stop_id": stopId
+            "stopId": stopId
         };
 
         let urlParameters = new URLSearchParams(window.location.search);
@@ -287,16 +419,24 @@
 
         $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/get-buses",
+            "url": "http://localhost:8080/api/bus",
             "data": data,
             "success": function (response) {
-                let buses = JSON.parse(response);
+                let busesDiv = $("#div_buses");
+
+                if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
+                    busesDiv.hide();
+
+                    $("#div_buses_error").show();
+
+                    return;
+                } //end if
+
+                let buses = response.content;
 
                 buses.sort(compareBuses);
 
-                let div_buses = $("#div_buses");
-
-                showTable(buses, div_buses);
+                showTable(buses, busesDiv);
             },
             "error": function () {
                 $("#div_buses").hide();
@@ -307,44 +447,49 @@
     } //updateBuses
 
     $(function () {
-        $("#form_stop_id").submit( function (e) {
-            e.preventDefault();
+        let routeSelect = $("#select_route");
+
+        routeSelect.select2({
+            "placeholder": "Select a route"
         });
 
-        $("#input_stop_id").on("input", function () {
+        loadRoutes();
+
+        routeSelect.change(function () {
+            let route = $(this).val();
+
+            loadDirections(route);
+        });
+
+        let directionSelect = $("#select_direction");
+
+        directionSelect.select2({
+            "placeholder": "Select a direction"
+        });
+
+        directionSelect.change(function () {
+            let route = $("#select_route").val();
+
+            let direction = $(this).val();
+
+            loadStops(route, direction);
+        });
+
+        let stopSelect = $("#select_stop");
+
+        stopSelect.select2({
+            "placeholder": "Select a stop"
+        });
+
+        stopSelect.change(function () {
             let stopId = $(this).val();
-
-            stopId = stopId.trim();
-
-            if (stopId === "") {
-                $(".invalid-tooltip").hide();
-
-                $("#button_search").prop("disabled", true);
-
-                return;
-            } //end if
-
-            let regex = /^\d+$/;
-
-            if (stopId.match(regex)) {
-                $(".invalid-tooltip").hide();
-
-                $("#button_search").prop("disabled", false);
-            } else {
-                $(".invalid-tooltip").show();
-
-                $("#button_search").prop("disabled", true);
-            } //end if
-        });
-
-        $("#button_search").click(function () {
-            let stopId = $("#input_stop_id").val();
 
             $("#hidden_input_stop_id").val(stopId);
 
             updateBuses();
         });
 
+        /*
         let urlParameters = new URLSearchParams(window.location.search);
 
         let stopId = null;
@@ -356,6 +501,7 @@
         } //end if
 
         updateBuses();
+         */
 
         let timeout = 60000;
 

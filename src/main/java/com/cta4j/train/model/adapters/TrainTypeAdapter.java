@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 
-package com.cta4j.model.adapters.train;
+package com.cta4j.train.model.adapters;
 
 import com.google.gson.TypeAdapter;
-import com.cta4j.model.train.Train;
+import com.cta4j.train.model.Train;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import com.google.gson.stream.JsonWriter;
@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import com.google.gson.stream.JsonReader;
-import com.cta4j.model.train.Route;
+import com.cta4j.train.model.Route;
 import com.google.gson.stream.JsonToken;
 import java.time.format.DateTimeParseException;
 

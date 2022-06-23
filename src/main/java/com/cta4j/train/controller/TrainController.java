@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
-package com.cta4j.controller.train;
+package com.cta4j.train.controller;
 
-import com.cta4j.ChicagoTransitAuthority;
+import com.cta4j.bus.utils.BusUtils;
+import com.cta4j.train.utils.TrainUtils;
 import com.cta4j.utils.Body;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Set;
-import com.cta4j.model.train.Train;
+import com.cta4j.train.model.Train;
 
 /**
  * A controller of the CTA4j application.
@@ -58,7 +59,7 @@ public final class TrainController {
             routes = new String[0];
         } //end if
 
-        Set<Train> trains = ChicagoTransitAuthority.getTrains(mapId, routes);
+        Set<Train> trains = TrainUtils.getTrains(mapId, routes);
 
         Body<Set<Train>> body = Body.success(trains);
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Logan Kulinski
+ * Copyright (c) 2021 Logan Kulinski
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,22 @@
  * SOFTWARE.
  */
 
-package com.cta4j.model.bus;
-
-import java.time.LocalDateTime;
+package com.cta4j.bus.model;
 
 /**
- * A bus run by the Chicago Transit Authority.
+ * A bus type of the Chicago Transit Authority.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version January 1, 2022
- * @param id the ID of this bus
- * @param route the route of this bus
- * @param destination the destination of this bus
- * @param stop the stop of this bus
- * @param type the type of this bus
- * @param predictionTime the prediction time of this bus
- * @param arrivalTime the arrival time of this bus
- * @param delayed the delayed flag of this bus
+ * @version December 31, 2021
  */
-public record Bus(Integer id, String route, String destination, String direction, String stop, Type type,
-                  LocalDateTime predictionTime, LocalDateTime arrivalTime, Boolean delayed) {
+public enum Type {
+    /**
+     * The singleton instance representing the arrival {@link Type}.
+     */
+    ARRIVAL,
+
+    /**
+     * The singleton instance representing the departure {@link Type}.
+     */
+    DEPARTURE
 }

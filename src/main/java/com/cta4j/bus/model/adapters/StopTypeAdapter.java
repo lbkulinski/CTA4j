@@ -1,6 +1,6 @@
-package com.cta4j.model.adapters.bus;
+package com.cta4j.bus.model.adapters;
 
-import com.cta4j.model.bus.Stop;
+import com.cta4j.bus.model.Stop;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;

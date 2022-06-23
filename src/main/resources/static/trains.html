@@ -234,7 +234,7 @@
     } //compareTrains
 
     function getTableRow(train) {
-        let properties = ["route", "destination", "run", "prediction_time", "arrival_time", "due", "scheduled",
+        let properties = ["route", "destination", "run", "predictionTime", "arrivalTime", "due", "scheduled",
                           "fault", "delayed"];
 
         let error = false;
@@ -269,11 +269,11 @@
 
         let run = $("<td>").text(train.run);
 
-        let arrivalDate = new Date(train.arrival_time);
+        let arrivalDate = new Date(train.arrivalTime);
 
         let arrivalMillis = arrivalDate.getTime();
 
-        let predictionDate = new Date(train.prediction_time);
+        let predictionDate = new Date(train.predictionTime);
 
         let predictionMillis = predictionDate.getTime();
 
@@ -332,7 +332,7 @@
         return tableRow;
     } //getTableRow
 
-    function showTable(trains, div_trains) {
+    function showTable(trains, trainsDiv) {
         let tableBody = $("#tbody_trains");
 
         tableBody.empty();
@@ -349,7 +349,7 @@
 
         $("#div_trains_error").hide();
 
-        div_trains.show();
+        trainsDiv.show();
     } //showTable
 
     function updateTrains() {
@@ -371,16 +371,24 @@
 
         $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/get-trains",
+            "url": "http://localhost:8080/api/train",
             "data": data,
             "success": function (response) {
-                let trains = JSON.parse(response);
+                let trainsDiv = $("#div_trains");
+
+                if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
+                    trainsDiv.hide();
+
+                    $("#div_trains_error").show();
+
+                    return;
+                } //end if
+
+                let trains = response.content;
 
                 trains.sort(compareTrains);
 
-                let div_trains = $("#div_trains");
-
-                showTable(trains, div_trains);
+                showTable(trains, trainsDiv);
             },
             "error": function () {
                 $("#div_trains").hide();

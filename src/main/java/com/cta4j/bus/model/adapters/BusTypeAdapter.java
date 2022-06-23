@@ -22,16 +22,18 @@
  * SOFTWARE.
  */
 
-package com.cta4j.model.adapters.bus;
+package com.cta4j.bus.model.adapters;
 
+import com.cta4j.bus.model.Route;
+import com.cta4j.bus.model.Stop;
 import com.google.gson.TypeAdapter;
-import com.cta4j.model.bus.Bus;
+import com.cta4j.bus.model.Bus;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Objects;
-import com.cta4j.model.bus.Type;
+import com.cta4j.bus.model.Type;
 import java.time.LocalDateTime;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -42,7 +44,7 @@ import java.time.format.DateTimeParseException;
  * A type adapter for the {@link Bus} class.
  *
  * @author Logan Kulinski, lbkulinski@gmail.com
- * @version January 1, 2022
+ * @version June 23, 2022
  */
 public final class BusTypeAdapter extends TypeAdapter<Bus> {
     /**
@@ -83,9 +85,11 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
 
         jsonWriter.name("route");
 
-        String route = bus.route();
+        Route route = bus.route();
 
-        jsonWriter.value(route);
+        String routeId = route.id();
+
+        jsonWriter.value(routeId);
 
         jsonWriter.name("destination");
 
@@ -101,9 +105,11 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
 
         jsonWriter.name("stop");
 
-        String stop = bus.stop();
+        Stop stop = bus.stop();
 
-        jsonWriter.value(stop);
+        String stopName = stop.name();
+
+        jsonWriter.value(stopName);
 
         jsonWriter.name("type");
 
@@ -119,7 +125,7 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
 
         jsonWriter.value(typeString);
 
-        jsonWriter.name("prediction_time");
+        jsonWriter.name("predictionTime");
 
         LocalDateTime predictionTime = bus.predictionTime();
 
@@ -133,19 +139,19 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
 
         jsonWriter.value(predictionTimeString);
 
-        jsonWriter.name("arrival_time");
+        jsonWriter.name("typeTime");
 
-        LocalDateTime arrivalTime = bus.arrivalTime();
+        LocalDateTime typeTime = bus.typeTime();
 
-        String arrivalTimeString;
+        String typeTimeString;
 
-        if (arrivalTime == null) {
-            arrivalTimeString = null;
+        if (typeTime == null) {
+            typeTimeString = null;
         } else {
-            arrivalTimeString = arrivalTime.toString();
+            typeTimeString = typeTime.toString();
         } //end if
 
-        jsonWriter.value(arrivalTimeString);
+        jsonWriter.value(typeTimeString);
 
         jsonWriter.name("delayed");
 
@@ -167,19 +173,21 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
     public static Bus readBus(JsonReader jsonReader) throws IOException {
         Integer id = null;
 
-        String route = null;
+        Integer stopId = null;
 
-        String destination = null;
+        String stopName = null;
+
+        String routeId = null;
 
         String direction = null;
 
-        String stop = null;
+        String destination = null;
 
         Type type = null;
 
         LocalDateTime predictionTime = null;
 
-        LocalDateTime arrivalTime = null;
+        LocalDateTime typeTime = null;
 
         Boolean delayed = null;
 
@@ -206,10 +214,21 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
                               .log("the response includes a malformed ID");
                     } //end try catch
                 } //case "vid"
-                case "rt" -> route = jsonReader.nextString();
-                case "des" -> destination = jsonReader.nextString();
+                case "stpid" -> {
+                    String stopIdString = jsonReader.nextString();
+
+                    try {
+                        stopId = Integer.parseInt(stopIdString);
+                    } catch (NumberFormatException e) {
+                        LOGGER.atError()
+                              .withThrowable(e)
+                              .log("the response includes a malformed stop ID");
+                    } //end try catch
+                } //case "stp"
+                case "stpnm" -> stopName = jsonReader.nextString();
+                case "rt" -> routeId = jsonReader.nextString();
                 case "rtdir" -> direction = jsonReader.nextString();
-                case "stpnm" -> stop = jsonReader.nextString();
+                case "des" -> destination = jsonReader.nextString();
                 case "typ" -> {
                     String typeString = jsonReader.nextString();
 
@@ -217,7 +236,7 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
                         case "A" -> Type.ARRIVAL;
                         case "D" -> Type.DEPARTURE;
                         default -> {
-                            String errorMessage = "the response includes a novel type: %s".formatted(type);
+                            String errorMessage = "the response includes a novel type: %s".formatted(typeString);
 
                             LOGGER.atError()
                                   .log(errorMessage);
@@ -269,7 +288,7 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
                     } //end try catch
 
                     try {
-                        arrivalTime = LocalDateTime.parse(arrivalTimeString, formatter);
+                        typeTime = LocalDateTime.parse(arrivalTimeString, formatter);
                     } catch (DateTimeParseException e) {
                         LOGGER.atError()
                               .withThrowable(e)
@@ -283,7 +302,11 @@ public final class BusTypeAdapter extends TypeAdapter<Bus> {
 
         jsonReader.endObject();
 
-        return new Bus(id, route, destination, direction, stop, type, predictionTime, arrivalTime, delayed);
+        Stop stop = new Stop(stopId, stopName);
+
+        Route route = new Route(routeId, null);
+
+        return new Bus(id, stop, route, direction, destination, type, predictionTime, typeTime, delayed);
     } //readBus
 
     /**
