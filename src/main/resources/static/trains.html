@@ -146,31 +146,31 @@
             options.push(option);
         });
 
-        let select_stations = $("#select_stations");
+        let stationsSelect = $("#select_stations");
 
-        select_stations.append(options);
+        stationsSelect.append(options);
 
-        select_stations.select2({
+        stationsSelect.select2({
             "placeholder": "Select a station"
         });
 
-        let map_id = $("#input_map_id").val();
+        let mapId = $("#input_map_id").val();
 
-        select_stations.val(map_id)
+        stationsSelect.val(mapId)
                        .trigger("change");
 
-        select_stations.change(function () {
+        stationsSelect.change(function () {
             let mapId = $(this).val();
 
             if (!mapId) {
                 return;
             } //end if
 
-            let search_parameters = new URLSearchParams(window.location.search);
+            let searchParameters = new URLSearchParams(window.location.search);
 
-            search_parameters.set("map_id", mapId);
+            searchParameters.set("map_id", mapId);
 
-            window.location.search = search_parameters.toString();
+            window.location.search = searchParameters.toString();
         });
 
         $("#div_stations_error").hide();
@@ -195,12 +195,12 @@
 
     function compareTrains(train0, train1) {
         if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("destination") ||
-            !train0.hasOwnProperty("arrival_time")) {
+            !train0.hasOwnProperty("arrivalTime")) {
             return 0;
         } //end if
 
         if (!train1.hasOwnProperty("route") || !train1.hasOwnProperty("destination") ||
-            !train1.hasOwnProperty("arrival_time")) {
+            !train1.hasOwnProperty("arrivalTime")) {
             return 0;
         } //end if
 
@@ -208,13 +208,13 @@
 
         let destination0 = train0.destination;
 
-        let date0 = new Date(train0.arrival_time);
+        let date0 = new Date(train0.arrivalTime);
 
         let route1 = train1.route;
 
         let destination1 = train1.destination;
 
-        let date1 = new Date(train1.arrival_time);
+        let date1 = new Date(train1.arrivalTime);
 
         if (route0 < route1) {
             return -1;
@@ -234,8 +234,8 @@
     } //compareTrains
 
     function getTableRow(train) {
-        let properties = ["route", "destination", "run", "predictionTime", "arrivalTime", "due", "scheduled",
-                          "fault", "delayed"];
+        let properties = ["route", "destination", "run", "predictionTime", "arrivalTime", "due", "scheduled", "fault",
+                          "delayed"];
 
         let error = false;
 
@@ -371,7 +371,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/api/train",
+            "url": "http://localhost:8080/api/train",
             "data": data,
             "success": function (response) {
                 let trainsDiv = $("#div_trains");
@@ -386,7 +386,11 @@
 
                 let trains = response.content;
 
+                console.log(trains);
+
                 trains.sort(compareTrains);
+
+                console.log(trains);
 
                 showTable(trains, trainsDiv);
             },
