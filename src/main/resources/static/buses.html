@@ -276,7 +276,11 @@
             return 0;
         } //end if
 
-        let routeId0 = route0.id;
+        let routeId0 = parseInt(route0.id);
+
+        if (isNaN(routeId0)) {
+            routeId0 = 0;
+        } //end if
 
         let destination0 = bus0.destination;
 
@@ -288,7 +292,11 @@
             return 0;
         } //end if
 
-        let routeId1 = route1.id;
+        let routeId1 = parseInt(route1.id);
+
+        if (isNaN(routeId1)) {
+            routeId1 = 0;
+        } //end if
 
         let destination1 = bus1.destination;
 
