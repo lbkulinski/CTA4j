@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css"
           integrity="sha256-FdatTf20PQr/rWg+cAKfl6j4/IY3oohFAJ7gVC3M34E=" crossorigin="anonymous">
     <style>
-        html, head, body, .input-group-text, .form-control, .form-control:focus, .btn, .select2-search, .select2-results {
+        html, head, body, .input-group-text, .form-control, .form-control:focus, .select2-search, .select2-results {
             background-color: #212529;
         }
 
@@ -24,24 +24,12 @@
             appearance: none;
         }
 
+        .select2-container--default .select2-selection--single .select2-selection__rendered, .popover-content {
+            color: white;
+        }
 
-        .input-group-text, .form-control, .btn {
+        .input-group-text, .form-control {
             border: 1px solid dimgray;
-        }
-
-        .btn:hover {
-            border: 1px solid dimgray;
-            background-color: dimgray;
-        }
-
-        .btn:active {
-            border: 1px solid gray;
-            background-color: gray;
-        }
-
-        .btn:disabled, .btn[disabled]{
-            border: 1px solid gray;
-            background-color: black;
         }
 
         .card {
