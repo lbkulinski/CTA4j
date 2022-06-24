@@ -67,7 +67,7 @@
         }
     </style>
     <title id="title">CTA4j Bus Tracker</title>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ENS0NL67SC"></script>
+    <script async src="https://googletagmanager.com/gtag/js?id=G-ENS0NL67SC"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
 
@@ -141,7 +141,7 @@
     function loadRoutes() {
         return $.ajax({
             "type": "GET",
-            "url": "https://www.cta4j.com/api/bus/route",
+            "url": "https://cta4j.com/api/bus/route",
             "success": function (response) {
                 if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
                     return;
@@ -179,7 +179,7 @@
     function loadStops(route, direction) {
         return $.ajax({
             "type": "GET",
-            "url": "https://www.cta4j.com/api/bus/stop",
+            "url": "https://cta4j.com/api/bus/stop",
             "data": {
                 "route": route,
                 "direction": direction
@@ -245,7 +245,7 @@
     function loadDirections(route) {
         return $.ajax({
             "type": "GET",
-            "url": "https://www.cta4j.com/api/bus/direction",
+            "url": "https://cta4j.com/api/bus/direction",
             "data": {
                 "route": route
             },
@@ -471,7 +471,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "https://www.cta4j.com/api/bus",
+            "url": "https://cta4j.com/api/bus",
             "data": data,
             "success": function (response) {
                 let busesDiv = $("#div_buses");
