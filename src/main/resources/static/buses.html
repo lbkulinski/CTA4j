@@ -483,15 +483,18 @@
             return;
         } //end if
 
-        let data = {
-            "stop_id": stopId
-        };
+        let route = $("#hidden_input_route").val();
 
-        let urlParameters = new URLSearchParams(window.location.search);
+        if (!route) {
+            $("#tbody_buses").empty();
 
-        if (urlParameters.has("route")) {
-            data["route"] = urlParameters.getAll("route");
+            return;
         } //end if
+
+        let data = {
+            "stop_id": stopId,
+            "route": route
+        };
 
         $.ajax({
             "type": "GET",
@@ -595,10 +598,14 @@
 
         $.when(loadRoutes())
          .done(function () {
-             if (urlParameters.has("stop_id")) {
+             if (urlParameters.has("stop_id") && urlParameters.has("route")) {
                  let stopId = urlParameters.get("stop_id");
 
                  $("#hidden_input_stop_id").val(stopId);
+
+                 let route = urlParameters.get("route");
+
+                 $("#hidden_input_route").val(route);
 
                  updateBuses(true);
              } //end if
