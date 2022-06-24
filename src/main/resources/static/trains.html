@@ -371,7 +371,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/train",
+            "url": "https://cta4j.com/api/train",
             "data": data,
             "success": function (response) {
                 let trainsDiv = $("#div_trains");
@@ -386,11 +386,7 @@
 
                 let trains = response.content;
 
-                console.log(trains);
-
                 trains.sort(compareTrains);
-
-                console.log(trains);
 
                 showTable(trains, trainsDiv);
             },
