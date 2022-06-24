@@ -570,10 +570,14 @@
 
             updateBuses();
 
-            if (stopId) {
+            let route = $("#hidden_input_route").val();
+
+            if (stopId && route) {
                 let url = new URL(window.location);
 
                 url.searchParams.set("stop_id", stopId);
+
+                url.searchParams.set("route", route);
 
                 window.history.pushState({}, "", url);
             } //end if
