@@ -141,7 +141,7 @@
     function loadRoutes() {
         return $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/api/bus/route",
+            "url": "http://localhost:8080/api/bus/route",
             "success": function (response) {
                 if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
                     return;
@@ -179,7 +179,7 @@
     function loadStops(route, direction) {
         return $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/api/bus/stop",
+            "url": "http://localhost:8080/api/bus/stop",
             "data": {
                 "route": route,
                 "direction": direction
@@ -220,32 +220,10 @@
         });
     } //loadStops
 
-    function prepopulateStop(urlParameters) {
-        let route = $("#hidden_input_route").val();
-
-        let direction = $("#hidden_input_direction").val();
-
-        let loadStopsAjax = loadStops(route, direction);
-
-        $.when(loadStopsAjax)
-         .done(function () {
-             let stopId = urlParameters.get("stop_id");
-
-             $("#select_route").val(route)
-                               .trigger("change.select2");
-
-             $("#select_direction").val(direction)
-                                   .trigger("change.select2");
-
-             $("#select_stop").val(stopId)
-                              .trigger("change.select2");
-         });
-    } //prepopulateStop
-
     function loadDirections(route) {
         return $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/api/bus/direction",
+            "url": "http://localhost:8080/api/bus/direction",
             "data": {
                 "route": route
             },
@@ -280,23 +258,6 @@
             }
         });
     } //loadDirections
-
-    function prepopulateDirection(urlParameters) {
-        let route = $("#hidden_input_route").val();
-
-        let loadDirectionsAjax = loadDirections(route);
-
-        $.when(loadDirectionsAjax)
-         .done(function () {
-             let direction = urlParameters.get("direction");
-
-             $("#hidden_input_direction").val(direction);
-
-             if (urlParameters.has("stop_id")) {
-                 prepopulateStop(urlParameters);
-             } //end if
-         });
-    } //prepopulateDirections
 
     function compareBuses(bus0, bus1) {
         if (!bus0.hasOwnProperty("route") || !bus0.hasOwnProperty("destination") ||
@@ -432,6 +393,59 @@
         return tableRow;
     } //getTableRow
 
+    function prepopulateSelects(buses) {
+        if (buses.length === 0) {
+            return;
+        } //end if
+
+        let bus = buses[0];
+
+        if (!bus.hasOwnProperty("route")) {
+            return;
+        } //end if
+
+        let route = bus.route;
+
+        if (!route.hasOwnProperty("id")) {
+            return;
+        } //end if
+
+        let routeId = route.id;
+
+        $.when(loadDirections(routeId))
+         .done(function () {
+             if (!bus.hasOwnProperty("direction")) {
+                 return;
+             } //end if
+
+             let direction = bus.direction;
+
+             $.when(loadStops(routeId, direction))
+              .done(function () {
+                  if (!bus.hasOwnProperty("stop")) {
+                      return;
+                  } //end if
+
+                  let stop = bus.stop;
+
+                  if (!stop.hasOwnProperty("id")) {
+                      return;
+                  } //end if
+
+                  let stopId = stop.id;
+
+                  $("#select_route").val(routeId)
+                                    .trigger("change.select2");
+
+                  $("#select_direction").val(direction)
+                                        .trigger("change.select2");
+
+                  $("#select_stop").val(stopId)
+                                   .trigger("change.select2");
+              });
+         });
+    } //prepopulateSelects
+
     function showTable(buses, busesDiv) {
         let tableBody = $("#tbody_buses");
 
@@ -452,10 +466,12 @@
         busesDiv.show();
     } //showTable
 
-    function updateBuses() {
+    function updateBuses(onLoad = false) {
         let stopId = $("#hidden_input_stop_id").val();
 
         if (!stopId) {
+            $("#tbody_buses").empty();
+
             return;
         } //end if
 
@@ -471,7 +487,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/api/bus",
+            "url": "http://localhost:8080/api/bus",
             "data": data,
             "success": function (response) {
                 let busesDiv = $("#div_buses");
@@ -485,6 +501,10 @@
                 } //end if
 
                 let buses = response.content;
+
+                if (onLoad === true) {
+                    prepopulateSelects(buses);
+                } //end if
 
                 buses.sort(compareBuses);
 
@@ -519,12 +539,6 @@
             $("#hidden_input_direction").val(null);
 
             $("#hidden_input_stop_id").val(null);
-
-            let url = new URL(window.location);
-
-            url.searchParams.set("route", route);
-
-            window.history.pushState({}, '', url);
         });
 
         let directionSelect = $("#select_direction");
@@ -541,12 +555,6 @@
             loadStops(route, direction);
 
             $("#hidden_input_direction").val(direction);
-
-            let url = new URL(window.location);
-
-            url.searchParams.set("direction", direction);
-
-            window.history.pushState({}, '', url);
         });
 
         let stopSelect = $("#select_stop");
@@ -562,35 +570,25 @@
 
             updateBuses();
 
-            let url = new URL(window.location);
+            if (stopId) {
+                let url = new URL(window.location);
 
-            url.searchParams.set("stop_id", stopId);
+                url.searchParams.set("stop_id", stopId);
 
-            window.history.pushState({}, '', url);
+                window.history.pushState({}, "", url);
+            } //end if
         });
 
         let urlParameters = new URLSearchParams(window.location.search);
 
-        if (urlParameters.has("stop_id")) {
-            let stopId = urlParameters.get("stop_id");
-
-            $("#hidden_input_stop_id").val(stopId);
-
-            updateBuses();
-        } //end if
-
-        let loadRoutesAjax = loadRoutes();
-
-        $.when(loadRoutesAjax)
+        $.when(loadRoutes())
          .done(function () {
-             if (urlParameters.has("route")) {
-                 let route = urlParameters.get("route");
+             if (urlParameters.has("stop_id")) {
+                 let stopId = urlParameters.get("stop_id");
 
-                 $("#hidden_input_route").val(route);
-             } //end if
+                 $("#hidden_input_stop_id").val(stopId);
 
-             if (urlParameters.has("direction")) {
-                 prepopulateDirection(urlParameters);
+                 updateBuses(true);
              } //end if
          });
 
