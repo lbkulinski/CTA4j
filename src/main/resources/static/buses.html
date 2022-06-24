@@ -141,7 +141,7 @@
     function loadRoutes() {
         return $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/bus/route",
+            "url": "https://www.cta4j.com/api/bus/route",
             "success": function (response) {
                 if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
                     return;
@@ -179,7 +179,7 @@
     function loadStops(route, direction) {
         return $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/bus/stop",
+            "url": "https://www.cta4j.com/api/bus/stop",
             "data": {
                 "route": route,
                 "direction": direction
@@ -245,7 +245,7 @@
     function loadDirections(route) {
         return $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/bus/direction",
+            "url": "https://www.cta4j.com/api/bus/direction",
             "data": {
                 "route": route
             },
@@ -471,7 +471,7 @@
 
         $.ajax({
             "type": "GET",
-            "url": "http://localhost:8080/api/bus",
+            "url": "https://www.cta4j.com/api/bus",
             "data": data,
             "success": function (response) {
                 let busesDiv = $("#div_buses");
