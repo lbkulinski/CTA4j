@@ -67,7 +67,7 @@ public final class BusController {
      * @return a JSON response containing information about buses using the specified stop ID and routes
      */
     @GetMapping
-    public ResponseEntity<Body<Set<Bus>>> read(@RequestParam int stopId,
+    public ResponseEntity<Body<Set<Bus>>> read(@RequestParam("stop_id") int stopId,
                                                @RequestParam(value = "route[]", required = false) String[] routes) {
         if (routes == null) {
             routes = new String[0];

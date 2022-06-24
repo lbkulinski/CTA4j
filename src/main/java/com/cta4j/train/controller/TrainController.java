@@ -53,7 +53,7 @@ public final class TrainController {
      * @return a JSON response containing information about trains using the specified map ID and routes
      */
     @GetMapping
-    public ResponseEntity<Body<Set<Train>>> read(@RequestParam int mapId,
+    public ResponseEntity<Body<Set<Train>>> read(@RequestParam("map_id") int mapId,
                                                  @RequestParam(value = "route[]", required = false) String[] routes) {
         if (routes == null) {
             routes = new String[0];

@@ -83,7 +83,7 @@
 <body>
 <input id="hidden_input_route" name="route" type="hidden">
 <input id="hidden_input_direction" name="direction" type="hidden">
-<input id="hidden_input_stop_id" name="stopId" type="hidden">
+<input id="hidden_input_stop_id" name="stop_id" type="hidden">
 <div class="container mt-3">
     <div class="card mb-3" style="max-width: 40rem;">
         <div class="card-body">
@@ -229,7 +229,7 @@
 
         $.when(loadStopsAjax)
          .done(function () {
-             let stopId = urlParameters.get("stopId");
+             let stopId = urlParameters.get("stop_id");
 
              $("#select_route").val(route)
                                .trigger("change.select2");
@@ -292,7 +292,7 @@
 
              $("#hidden_input_direction").val(direction);
 
-             if (urlParameters.has("stopId")) {
+             if (urlParameters.has("stop_id")) {
                  prepopulateStop(urlParameters);
              } //end if
          });
@@ -460,7 +460,7 @@
         } //end if
 
         let data = {
-            "stopId": stopId
+            "stop_id": stopId
         };
 
         let urlParameters = new URLSearchParams(window.location.search);
@@ -564,15 +564,15 @@
 
             let url = new URL(window.location);
 
-            url.searchParams.set("stopId", stopId);
+            url.searchParams.set("stop_id", stopId);
 
             window.history.pushState({}, '', url);
         });
 
         let urlParameters = new URLSearchParams(window.location.search);
 
-        if (urlParameters.has("stopId")) {
-            let stopId = urlParameters.get("stopId");
+        if (urlParameters.has("stop_id")) {
+            let stopId = urlParameters.get("stop_id");
 
             $("#hidden_input_stop_id").val(stopId);
 
