@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Logan Kulinski
+ * Copyright (c) 2022 Logan Kulinski
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,8 @@ package com.cta4j.bus.model;
 /**
  * A bus type of the Chicago Transit Authority.
  *
- * @author Logan Kulinski, lbkulinski@gmail.com
- * @version December 31, 2021
+ * @author Logan Kulinski, rashes_lineage02@icloud.com
+ * @version July 15, 2022
  */
 public enum Type {
     /**

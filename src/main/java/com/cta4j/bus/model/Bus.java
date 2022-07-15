@@ -29,8 +29,8 @@ import java.time.LocalDateTime;
 /**
  * A bus run by the Chicago Transit Authority.
  *
- * @author Logan Kulinski, lbkulinski@gmail.com
- * @version June 23, 2022
+ * @author Logan Kulinski, rashes_lineage02@icloud.com
+ * @version July 15, 2022
  * @param id the ID of this bus
  * @param route the route of this bus
  * @param destination the destination of this bus

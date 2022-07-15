@@ -43,8 +43,8 @@ import java.time.format.DateTimeParseException;
 /**
  * A type adapter for the {@link Bus} class.
  *
- * @author Logan Kulinski, lbkulinski@gmail.com
- * @version June 23, 2022
+ * @author Logan Kulinski, rashes_lineage02@icloud.com
+ * @version July 15, 2022
  */
 public final class BusTypeAdapter extends TypeAdapter<Bus> {
     /**
