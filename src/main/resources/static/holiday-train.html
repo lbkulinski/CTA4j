@@ -80,6 +80,9 @@
                             Route
                         </th>
                         <th scope="col">
+                            Station
+                        </th>
+                        <th scope="col">
                             Destination
                         </th>
                         <th scope="col">
@@ -109,13 +112,13 @@
         integrity="sha256-AFAYEOkzB6iIKnTYZOdUf9FFje6lOTYdwRJKwTN5mks=" crossorigin="anonymous"></script>
 <script>
     function compareTrains(train0, train1) {
-        if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("destination") ||
-            !train0.hasOwnProperty("arrivalTime")) {
+        if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("station") ||
+            !train0.hasOwnProperty("destination") || !train0.hasOwnProperty("arrivalTime")) {
             return 0;
         } //end if
 
-        if (!train1.hasOwnProperty("route") || !train1.hasOwnProperty("destination") ||
-            !train1.hasOwnProperty("arrivalTime")) {
+        if (!train1.hasOwnProperty("route") || !train1.hasOwnProperty("station") ||
+            !train1.hasOwnProperty("destination") || !train1.hasOwnProperty("arrivalTime")) {
             return 0;
         } //end if
 
@@ -179,6 +182,8 @@
         let route = $("<td>").css("color", hexColor)
                              .text(train.route);
 
+        let station = $("<td>").text(train.station);
+
         let destination = $("<td>").text(train.destination);
 
         let arrivalDate = new Date(train.arrivalTime);
@@ -207,7 +212,7 @@
 
         let eta = $("<td>").text(etaString);
 
-        let tableRow = $("<tr>").append(route, destination, eta);
+        let tableRow = $("<tr>").append(route, station, destination, eta);
 
         let rowClass;
 
