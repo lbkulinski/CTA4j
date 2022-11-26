@@ -69,7 +69,7 @@
 <div class="container mt-3">
     <div class="card">
         <h5 class="card-header" style="color: white">
-            Chicago Holiday Train Tracker
+            Chicago Holiday Train Tracker (towards <span id="span_destination"></span>)
         </h5>
         <div class="card-body">
             <div id="div_trains">
@@ -81,9 +81,6 @@
                         </th>
                         <th scope="col">
                             Station
-                        </th>
-                        <th scope="col">
-                            Destination
                         </th>
                         <th scope="col">
                             ETA
@@ -185,8 +182,6 @@
 
         let station = $("<td>").text(train.station);
 
-        let destination = $("<td>").text(train.destination);
-
         let arrivalDate = new Date(train.arrivalTime);
 
         let arrivalMillis = arrivalDate.getTime();
@@ -213,7 +208,9 @@
 
         let eta = $("<td>").text(etaString);
 
-        let tableRow = $("<tr>").append(route, station, destination, eta);
+        let tableRow = $("<tr>").append(route, station, eta);
+
+        $("#span_destination").text(train.destination);
 
         let rowClass;
 
@@ -273,7 +270,7 @@
     function updateSchedule() {
         $.ajax({
             "type": "GET",
-            "url": "https://cta4j.com/api/follow",
+            "url": "http://localhost:8080/api/follow",
             "data": {
                 "run": 1225
             },
