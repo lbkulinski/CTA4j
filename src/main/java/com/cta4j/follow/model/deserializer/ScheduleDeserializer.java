@@ -53,7 +53,15 @@ public final class ScheduleDeserializer extends StdDeserializer<Schedule> {
                 "the field \"rt\" does not exist or is not a string in the specified content");
         } //end if
 
-        return routeNode.asText();
+        String[] routeParts = routeNode.asText()
+                                       .split("\s+");
+
+        if (routeParts.length == 0) {
+            throw new JsonMappingException(jsonParser,
+                "the field \"rt\" is not valid in the specified content");
+        } //end if
+
+        return routeParts[0].toUpperCase();
     } //getRoute
 
     /**
