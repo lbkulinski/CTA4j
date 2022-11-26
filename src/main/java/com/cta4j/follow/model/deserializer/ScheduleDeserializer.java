@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 Logan Kulinski
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.cta4j.follow.model.deserializer;
 
 import com.cta4j.follow.model.Schedule;
@@ -193,6 +217,14 @@ public final class ScheduleDeserializer extends StdDeserializer<Schedule> {
         return arrivalTime;
     } //getArrivalTime
 
+    /**
+     * Returns a {@link Train}'s due flag using the specified {@link JsonParser} and {@link JsonNode}.
+     *
+     * @param jsonParser the {@link JsonParser} to be used in the operation
+     * @param jsonNode the {@link JsonNode} to be used in the operation
+     * @return a {@link Train}'s due flag using the specified {@link JsonParser} and {@link JsonNode}
+     * @throws JsonMappingException if the specified {@link JsonNode} cannot be mapped to a due flag
+     */
     private Boolean getDue(JsonParser jsonParser, JsonNode jsonNode) throws JsonMappingException {
         JsonNode dueNode = jsonNode.get("isApp");
 
@@ -208,6 +240,14 @@ public final class ScheduleDeserializer extends StdDeserializer<Schedule> {
         return Objects.equals(dueString, trueString);
     } //getDue
 
+    /**
+     * Returns a {@link Train}'s scheduled flag using the specified {@link JsonParser} and {@link JsonNode}.
+     *
+     * @param jsonParser the {@link JsonParser} to be used in the operation
+     * @param jsonNode the {@link JsonNode} to be used in the operation
+     * @return a {@link Train}'s scheduled flag using the specified {@link JsonParser} and {@link JsonNode}
+     * @throws JsonMappingException if the specified {@link JsonNode} cannot be mapped to a scheduled flag
+     */
     private Boolean getScheduled(JsonParser jsonParser, JsonNode jsonNode) throws JsonMappingException {
         JsonNode scheduledNode = jsonNode.get("isSch");
 
@@ -223,6 +263,14 @@ public final class ScheduleDeserializer extends StdDeserializer<Schedule> {
         return Objects.equals(scheduledString, trueString);
     } //getScheduled
 
+    /**
+     * Returns a {@link Train}'s fault flag using the specified {@link JsonParser} and {@link JsonNode}.
+     *
+     * @param jsonParser the {@link JsonParser} to be used in the operation
+     * @param jsonNode the {@link JsonNode} to be used in the operation
+     * @return a {@link Train}'s fault flag using the specified {@link JsonParser} and {@link JsonNode}
+     * @throws JsonMappingException if the specified {@link JsonNode} cannot be mapped to a fault flag
+     */
     private Boolean getFault(JsonParser jsonParser, JsonNode jsonNode) throws JsonMappingException {
         JsonNode faultNode = jsonNode.get("isFlt");
 
@@ -238,6 +286,14 @@ public final class ScheduleDeserializer extends StdDeserializer<Schedule> {
         return Objects.equals(faultString, trueString);
     } //getFault
 
+    /**
+     * Returns a {@link Train}'s delayed flag using the specified {@link JsonParser} and {@link JsonNode}.
+     *
+     * @param jsonParser the {@link JsonParser} to be used in the operation
+     * @param jsonNode the {@link JsonNode} to be used in the operation
+     * @return a {@link Train}'s delayed flag using the specified {@link JsonParser} and {@link JsonNode}
+     * @throws JsonMappingException if the specified {@link JsonNode} cannot be mapped to a delayed flag
+     */
     private Boolean getDelayed(JsonParser jsonParser, JsonNode jsonNode) throws JsonMappingException {
         JsonNode delayedNode = jsonNode.get("isDly");
 
