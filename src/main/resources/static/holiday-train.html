@@ -250,8 +250,6 @@
     } //getTableRow
 
     function showTable(trains, trainsDiv) {
-        $("#span_destination").text("");
-
         let tableBody = $("#tbody_trains");
 
         tableBody.empty();
@@ -319,9 +317,13 @@
 
                 trains.sort(compareTrains);
 
+                $("#span_destination").text("");
+
                 showTable(trains, trainsDiv);
             },
             "error": function () {
+                $("#span_destination").text("");
+
                 $("#div_trains").hide();
 
                 $("#div_trains_warning").hide();
