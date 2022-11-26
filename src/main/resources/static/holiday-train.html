@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="Description" content="Chicago Holiday Train Tracker, CTA, Chicago Transit Authority, Train, CTA4j, Public Transit">
+    <!--<meta name="google-site-verification" content="XL7HoVn0BZ4EzPEG9ww8B9w6WQRNw6YEAW2XjuvLQOM">-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css"
+          integrity="sha256-FdatTf20PQr/rWg+cAKfl6j4/IY3oohFAJ7gVC3M34E=" crossorigin="anonymous">
+    <style>
+        html, head, body, .select2-search, .select2-results {
+            background-color: #212529;
+        }
+
+        .select2-container--default .select2-selection--single, .select2-search__field, .select2-results__option {
+            background-color: #212529;
+            color: white;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered, .popover-content {
+            color: white;
+        }
+
+        .select2-results__option[aria-selected = true] {
+            background-color: dimgray;
+        }
+
+        .select2-results__option--highlighted[aria-selected = true] {
+            background-color: steelblue;
+        }
+
+        .select2-container *:focus {
+            outline: none;
+        }
+
+        .card {
+            background-color: black;
+        }
+
+        .popover {
+            background-color: dimgray;
+            border: 0;
+        }
+
+        .popover-body {
+            color: white;
+        }
+
+        .popover .popover-arrow::before, .popover .popover-arrow::after {
+            display: none;
+        }
+    </style>
+    <title id="title">Chicago Holiday Train Tracker</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TLLEW77D7C"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-TLLEW77D7C');
+    </script>
+</head>
+<body>
+<div class="container mt-3">
+    <div class="card">
+        <h5 class="card-header" style="color: white">
+            Chicago Holiday Train Tracker
+        </h5>
+        <div class="card-body">
+            <div id="div_trains">
+                <table id="table_trains" class="table table-sm table-dark mt-0 mb-0">
+                    <thead>
+                    <tr>
+                        <th scope="col">
+                            Route
+                        </th>
+                        <th scope="col">
+                            Destination
+                        </th>
+                        <th scope="col">
+                            ETA
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody_trains">
+                    </tbody>
+                </table>
+            </div>
+            <div id="div_trains_warning" class="alert alert-warning mt-0 mb-0" role="alert" style="display: none;">
+                The Holiday Train does not appear to be running at this time.
+            </div>
+            <div id="div_trains_error" class="alert alert-danger mt-0 mb-0" role="alert" style="display: none;">
+                Error: The train data could not be retrieved.
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"
+        integrity="sha256-AFAYEOkzB6iIKnTYZOdUf9FFje6lOTYdwRJKwTN5mks=" crossorigin="anonymous"></script>
+<script>
+    function compareTrains(train0, train1) {
+        if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("destination") ||
+            !train0.hasOwnProperty("arrivalTime")) {
+            return 0;
+        } //end if
+
+        if (!train1.hasOwnProperty("route") || !train1.hasOwnProperty("destination") ||
+            !train1.hasOwnProperty("arrivalTime")) {
+            return 0;
+        } //end if
+
+        let route0 = train0.route;
+
+        let destination0 = train0.destination;
+
+        let date0 = new Date(train0.arrivalTime);
+
+        let route1 = train1.route;
+
+        let destination1 = train1.destination;
+
+        let date1 = new Date(train1.arrivalTime);
+
+        if (route0 < route1) {
+            return -1;
+        } else if (route0 > route1) {
+            return 1;
+        } else if (destination0 < destination1) {
+            return -1;
+        } else if (destination0 > destination1) {
+            return 1;
+        } else if (date0 < date1) {
+            return -1;
+        } else if (date0 === date1) {
+            return 0;
+        } else {
+            return 1;
+        } //end if
+    } //compareTrains
+
+    function getTableRow(train) {
+        let properties = ["route", "destination", "run", "predictionTime", "arrivalTime", "due", "scheduled", "fault",
+                          "delayed"];
+
+        let error = false;
+
+        properties.forEach(function (property) {
+            if (!train.hasOwnProperty(property)) {
+                error = true;
+            } //end if
+        });
+
+        if (error) {
+            return null;
+        } //end if
+
+        let routeToHexColor = {
+            "RED": "#C60C30",
+            "BLUE": "#00A1DE",
+            "BROWN": "#62361B",
+            "GREEN": "#009B3A",
+            "ORANGE": "#F9461C",
+            "PURPLE": "#522398",
+            "PINK": "#E27EA6",
+            "YELLOW": "#F9E300"
+        };
+
+        let hexColor = routeToHexColor[train.route];
+
+        let route = $("<td>").css("color", hexColor)
+                             .text(train.route);
+
+        let destination = $("<td>").text(train.destination);
+
+        let run = $("<td>").text(train.run);
+
+        let arrivalDate = new Date(train.arrivalTime);
+
+        let arrivalMillis = arrivalDate.getTime();
+
+        let predictionDate = new Date(train.predictionTime);
+
+        let predictionMillis = predictionDate.getTime();
+
+        let difference = arrivalMillis - predictionMillis;
+
+        let minuteMillis = 60000;
+
+        difference /= minuteMillis;
+
+        difference = Math.floor(difference);
+
+        let etaString;
+
+        if (difference <= 1) {
+            etaString = "Due";
+        } else {
+            etaString = `${difference} min`;
+        } //end if
+
+        let eta = $("<td>").text(etaString);
+
+        let tableRow = $("<tr>").append(route, destination, run, eta);
+
+        let rowClass;
+
+        let popoverContent;
+
+        if (train.due) {
+            rowClass = "table-success";
+
+            popoverContent = "This train is due.";
+        } else if (train.delayed) {
+            rowClass = "table-danger";
+
+            popoverContent = "This train is delayed.";
+        } else if (train.fault) {
+            rowClass = "table-warning";
+
+            popoverContent = "This train has a fault.";
+        } else if (train.scheduled) {
+            rowClass = "table-info";
+
+            popoverContent = "This train's data is not real-time.";
+        } else {
+            return tableRow;
+        } //end if
+
+        tableRow.addClass(rowClass);
+
+        tableRow.popover({
+            "trigger": "hover",
+            "placement": "auto",
+            "content": popoverContent
+        });
+
+        return tableRow;
+    } //getTableRow
+
+    function showTable(trains, trainsDiv) {
+        let tableBody = $("#tbody_trains");
+
+        tableBody.empty();
+
+        trains.forEach(function (train) {
+            let tableRow = getTableRow(train);
+
+            if (!tableRow) {
+                return;
+            } //end if
+
+            tableBody.append(tableRow);
+        });
+
+        $("#div_trains_error").hide();
+
+        trainsDiv.show();
+    } //showTable
+
+    function updateSchedule() {
+        $.ajax({
+            "type": "GET",
+            "url": "https://cta4j.com/api/follow",
+            "data": {
+                "run": 1225
+            },
+            "success": function (response) {
+                let trainsDiv = $("#div_trains");
+
+                if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
+                    trainsDiv.hide();
+
+                    $("#div_trains_error").show();
+
+                    return;
+                } //end if
+
+                let content = response.content;
+
+                if (!content.hasOwnProperty("trains")) {
+                    trainsDiv.hide();
+
+                    $("#div_trains_error").show();
+
+                    return;
+                } //end if
+
+                const trains = content.trains;
+
+                if (trains.length === 0) {
+                    trainsDiv.hide();
+
+                    $("#div_trains_warning").show();
+
+                    return;
+                } //end if
+
+                trains.sort(compareTrains);
+
+                showTable(trains, trainsDiv);
+            },
+            "error": function () {
+                $("#div_trains").hide();
+
+                $("#div_trains_error").show();
+            }
+        });
+    } //updateTrains
+
+    $(function () {
+        updateSchedule();
+
+        let timeout = 60000;
+
+        setInterval(updateSchedule, timeout);
+    });
+</script>
+</html>
