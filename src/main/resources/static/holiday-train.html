@@ -266,6 +266,8 @@
             tableBody.append(tableRow);
         });
 
+        $("#div_trains_warning").hide();
+
         $("#div_trains_error").hide();
 
         trainsDiv.show();
@@ -284,6 +286,8 @@
                 if ((response.status !== "SUCCESS") || !response.hasOwnProperty("content")) {
                     trainsDiv.hide();
 
+                    $("#div_trains_warning").hide();
+
                     $("#div_trains_error").show();
 
                     return;
@@ -293,6 +297,8 @@
 
                 if (!content.hasOwnProperty("trains")) {
                     trainsDiv.hide();
+
+                    $("#div_trains_warning").hide();
 
                     $("#div_trains_error").show();
 
@@ -317,6 +323,8 @@
             },
             "error": function () {
                 $("#div_trains").hide();
+
+                $("#div_trains_warning").hide();
 
                 $("#div_trains_error").show();
             }
