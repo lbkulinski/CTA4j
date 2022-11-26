@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A deserializer for the {@link Schedule} class.
@@ -192,6 +193,66 @@ public final class ScheduleDeserializer extends StdDeserializer<Schedule> {
         return arrivalTime;
     } //getArrivalTime
 
+    private Boolean getDue(JsonParser jsonParser, JsonNode jsonNode) throws JsonMappingException {
+        JsonNode dueNode = jsonNode.get("isApp");
+
+        if ((dueNode == null) || !dueNode.isTextual()) {
+            throw new JsonMappingException(jsonParser,
+                "the field \"isApp\" does not exist or is not a string in the specified content");
+        } //end if
+
+        String dueString = dueNode.asText();
+
+        String trueString = "1";
+
+        return Objects.equals(dueString, trueString);
+    } //getDue
+
+    private Boolean getScheduled(JsonParser jsonParser, JsonNode jsonNode) throws JsonMappingException {
+        JsonNode scheduledNode = jsonNode.get("isSch");
+
+        if ((scheduledNode == null) || !scheduledNode.isTextual()) {
+            throw new JsonMappingException(jsonParser,
+                "the field \"isSch\" does not exist or is not a string in the specified content");
+        } //end if
+
+        String scheduledString = scheduledNode.asText();
+
+        String trueString = "1";
+
+        return Objects.equals(scheduledString, trueString);
+    } //getScheduled
+
+    private Boolean getFault(JsonParser jsonParser, JsonNode jsonNode) throws JsonMappingException {
+        JsonNode faultNode = jsonNode.get("isFlt");
+
+        if ((faultNode == null) || !faultNode.isTextual()) {
+            throw new JsonMappingException(jsonParser,
+                "the field \"isFlt\" does not exist or is not a string in the specified content");
+        } //end if
+
+        String faultString = faultNode.asText();
+
+        String trueString = "1";
+
+        return Objects.equals(faultString, trueString);
+    } //getFault
+
+    private Boolean getDelayed(JsonParser jsonParser, JsonNode jsonNode) throws JsonMappingException {
+        JsonNode delayedNode = jsonNode.get("isDly");
+
+        if ((delayedNode == null) || !delayedNode.isTextual()) {
+            throw new JsonMappingException(jsonParser,
+                "the field \"isDly\" does not exist or is not a string in the specified content");
+        } //end if
+
+        String delayedString = delayedNode.asText();
+
+        String trueString = "1";
+
+        return Objects.equals(delayedString, trueString);
+    } //getDelayed
+
     /**
      * Returns a {@link Train} that is deserialized using the specified {@link JsonParser} and
      * {@link DeserializationContext}.
@@ -242,7 +303,16 @@ public final class ScheduleDeserializer extends StdDeserializer<Schedule> {
 
             LocalDateTime arrivalTime = this.getArrivalTime(jsonParser, etaNode);
 
-            Train train = new Train(route, run, station, destination, predictionTime, arrivalTime);
+            Boolean due = this.getDue(jsonParser, etaNode);
+
+            Boolean scheduled = this.getScheduled(jsonParser, etaNode);
+
+            Boolean fault = this.getFault(jsonParser, etaNode);
+
+            Boolean delayed = this.getDelayed(jsonParser, etaNode);
+
+            Train train = new Train(route, run, station, destination, predictionTime, arrivalTime, due, scheduled,
+                fault, delayed);
 
             trains.add(train);
         } //end for

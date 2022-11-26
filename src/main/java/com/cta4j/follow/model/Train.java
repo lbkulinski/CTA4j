@@ -15,5 +15,5 @@ import java.time.LocalDateTime;
  * @param arrivalTime the arrival time of this {@link Train}
  */
 public record Train(String route, int run, String station, String destination, LocalDateTime predictionTime,
-    LocalDateTime arrivalTime) {
+    LocalDateTime arrivalTime, Boolean due, Boolean scheduled, Boolean fault, Boolean delayed) {
 }
