@@ -182,8 +182,6 @@
 
         let destination = $("<td>").text(train.destination);
 
-        let run = $("<td>").text(train.run);
-
         let arrivalDate = new Date(train.arrivalTime);
 
         let arrivalMillis = arrivalDate.getTime();
@@ -210,7 +208,7 @@
 
         let eta = $("<td>").text(etaString);
 
-        let tableRow = $("<tr>").append(route, destination, run, eta);
+        let tableRow = $("<tr>").append(route, destination, eta);
 
         let rowClass;
 
