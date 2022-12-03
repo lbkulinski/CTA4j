@@ -35,9 +35,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * A deserializer for the {@link Schedule} class.
@@ -344,7 +342,15 @@ public final class ScheduleDeserializer extends StdDeserializer<Schedule> {
                 "the field \"eta\" does not contain any elements in the specified content");
         } //end if
 
-        List<Train> trains = new ArrayList<>();
+        Comparator<Train> comparator = (train0, train1) -> {
+            LocalDateTime arrivalTime0 = train0.arrivalTime();
+
+            LocalDateTime arrivalTime1 = train1.arrivalTime();
+
+            return arrivalTime0.compareTo(arrivalTime1);
+        };
+
+        Set<Train> trains = new TreeSet<>(comparator);
 
         for (JsonNode etaNode : etasNode) {
             String route = this.getRoute(jsonParser, etaNode);
