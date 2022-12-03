@@ -109,37 +109,19 @@
         integrity="sha256-AFAYEOkzB6iIKnTYZOdUf9FFje6lOTYdwRJKwTN5mks=" crossorigin="anonymous"></script>
 <script>
     function compareTrains(train0, train1) {
-        if (!train0.hasOwnProperty("route") || !train0.hasOwnProperty("station") ||
-            !train0.hasOwnProperty("destination") || !train0.hasOwnProperty("arrivalTime")) {
+        if (!train0.hasOwnProperty("arrivalTime")) {
             return 0;
         } //end if
 
-        if (!train1.hasOwnProperty("route") || !train1.hasOwnProperty("station") ||
-            !train1.hasOwnProperty("destination") || !train1.hasOwnProperty("arrivalTime")) {
+        if (!train1.hasOwnProperty("arrivalTime")) {
             return 0;
         } //end if
-
-        let route0 = train0.route;
-
-        let destination0 = train0.destination;
 
         let date0 = new Date(train0.arrivalTime);
 
-        let route1 = train1.route;
-
-        let destination1 = train1.destination;
-
         let date1 = new Date(train1.arrivalTime);
 
-        if (route0 < route1) {
-            return -1;
-        } else if (route0 > route1) {
-            return 1;
-        } else if (destination0 < destination1) {
-            return -1;
-        } else if (destination0 > destination1) {
-            return 1;
-        } else if (date0 < date1) {
+        if (date0 < date1) {
             return -1;
         } else if (date0 === date1) {
             return 0;
