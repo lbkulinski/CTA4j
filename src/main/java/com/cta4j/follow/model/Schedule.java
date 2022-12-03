@@ -27,15 +27,15 @@ package com.cta4j.follow.model;
 import com.cta4j.follow.model.deserializer.ScheduleDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * A schedule of the Chicago Transit Authority.
  *
  * @author Logan Kulinski, rashes_lineage02@icloud.com
  * @version November 26, 2022
- * @param trains the {@link List} of {@link Train}s of this {@link Schedule}
+ * @param trains the {@link Set} of {@link Train}s of this {@link Schedule}
  */
 @JsonDeserialize(using = ScheduleDeserializer.class)
-public record Schedule(List<Train> trains) {
+public record Schedule(Set<Train> trains) {
 }

@@ -43,6 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * A service of the CTA4j application used to follow trains.
@@ -124,7 +125,7 @@ public final class FollowService {
                                 .withThrowable(e)
                                 .log();
 
-            List<Train> trains = List.of();
+            Set<Train> trains = Set.of();
 
             Schedule schedule = new Schedule(trains);
 
@@ -147,7 +148,7 @@ public final class FollowService {
                                 .withThrowable(e)
                                 .log();
 
-            List<Train> trains = List.of();
+            Set<Train> trains = Set.of();
 
             schedule = new Schedule(trains);
         } //end try catch
