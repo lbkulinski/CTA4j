@@ -1,8 +1,11 @@
 # CTA4j
-A collection of Java-based projects related to the Chicago Transit Authority
+**NOTE:** This project has been superseded by a new set of repositories. This new version of cta4j is built with GraphQL and React.
 
-#### Examples
-- [Train Tracker Back-End (JSON Response)](https://cta4j.com/get-trains?map_id=40260)
-- [Bus Tracker Back-End (JSON Response)](https://cta4j.com/get-buses?stop_id=1117)
-- [Basic Train Tracker Front-End](https://cta4j.com/trains.html?map_id=40260)
-- [Basic Bus Tracker Front-End](https://cta4j.com/buses.html?stop_id=1117)
+The new app can be found by visting https://cta4j.app.
+
+The new repositories can be found here:
+- [React Front-end](https://github.com/lbkulinski/cta4j-front-end)
+- [GraphQL Train Service](https://github.com/lbkulinski/cta-train-service)
+- [GraphQL Bus Service](https://github.com/lbkulinski/cta-bus-service)
+
+A collection of Java-based projects related to the Chicago Transit Authority
